@@ -5,8 +5,9 @@ using Terraria.ID;
 using TerrariaApi.Server;
 using TShockAPI;
 using TShockAPI.Hooks;
+using PlayerData = AutoFish.Data.PlayerData;
 
-namespace AutoFish;
+namespace AutoFish.AFMain;
 
 [ApiVersion(2, 1)]
 public class AutoFish : TerrariaPlugin
@@ -308,7 +309,7 @@ public class AutoFish : TerrariaPlugin
 
     #region 玩家更新配置方法（创建配置结构）
 
-    internal static MyData Data = new();
+    internal static PlayerData Data = new();
 
     private void OnJoin(JoinEventArgs args)
     {
@@ -320,7 +321,7 @@ public class AutoFish : TerrariaPlugin
 
         // 如果玩家不在数据表中，则创建新的数据条目
         if (!Data.Items.ContainsKey(plr.Name))
-            Data.Items[plr.Name] = new MyData.ItemData
+            Data.Items[plr.Name] = new PlayerData.ItemData
             {
                 Name = plr.Name,
                 Enabled = true,
@@ -337,7 +338,7 @@ public class AutoFish : TerrariaPlugin
 
     private static int ClearCount; //需要关闭钓鱼权限的玩家计数
 
-    private static void ExitMod(TSPlayer plr, MyData.ItemData data)
+    private static void ExitMod(TSPlayer plr, PlayerData.ItemData data)
     {
         var mess2 = new StringBuilder();
         mess2.AppendLine("[i:3455][c/AD89D5:自][c/D68ACA:动][c/DF909A:钓][c/E5A894:鱼][i:3454]");

@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using TShockAPI;
 
-namespace AutoFish;
+namespace AutoFish.AFMain;
 
 internal class Configuration
 {

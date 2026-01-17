@@ -2,7 +2,7 @@
 using Terraria;
 using TShockAPI;
 
-namespace AutoFish;
+namespace AutoFish.AFMain;
 
 public class Commands
 {
