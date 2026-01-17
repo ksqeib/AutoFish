@@ -28,7 +28,8 @@ public class AutoFish : TerrariaPlugin
             return;
 
         // 从数据表中获取与玩家名字匹配的配置项
-        if (!Data.Items.TryGetValue(plr.Name, out var list) || list == null || !list.Enabled) return;
+        var list = PlayerData.GetOrCreatePlayerData(plr.Name, CreateDefaultPlayerData);
+        if (!list.Enabled) return;
 
         // 正常状态下与消耗模式下启用自动钓鱼
         if (!Config.ConMod || (Config.ConMod && list.Mod))
@@ -131,7 +132,8 @@ public class AutoFish : TerrariaPlugin
             return;
 
         // 从数据表中获取与玩家名字匹配的配置项
-        if (!Data.Items.TryGetValue(plr.Name, out var list) || list == null || !list.Enabled) return;
+        var list = PlayerData.GetOrCreatePlayerData(plr.Name, CreateDefaultPlayerData);
+        if (!list.Enabled) return;
 
         // 正常状态下与消耗模式下启用多线钓鱼
         if (!Config.ConMod || (Config.ConMod && list.Mod))
@@ -157,7 +159,8 @@ public class AutoFish : TerrariaPlugin
         if (plr == null || !plr.Active || !plr.IsLoggedIn || !Config.Enabled || !plr.HasPermission("autofish")) return;
 
         // 从数据表中获取与玩家名字匹配的配置项
-        if (!Data.Items.TryGetValue(plr.Name, out var list) || list == null || !list.Buff) return;
+        var list = PlayerData.GetOrCreatePlayerData(plr.Name, CreateDefaultPlayerData);
+        if (!list.Buff) return;
 
         //出现鱼钩摆动就给玩家施加buff
         if (list.Enabled)
@@ -177,7 +180,8 @@ public class AutoFish : TerrariaPlugin
             !plr.HasPermission("autofish"))
             return;
 
-        if (!Data.Items.TryGetValue(plr.Name, out var data) || data == null || !data.Enabled) return;
+        var data = PlayerData.GetOrCreatePlayerData(plr.Name, CreateDefaultPlayerData);
+        if (!data.Enabled) return;
 
         // 播报玩家消耗鱼饵用的
         var mess = new StringBuilder();
@@ -250,7 +254,7 @@ public class AutoFish : TerrariaPlugin
     public override Version Version => new(1, 3, 3);
 
     /// <summary>插件描述。</summary>
-    public override string Description => "涡轮增压不蒸鸭";
+    public override string Description => "青山常伴绿水，燕雀已是南飞";
 
     /// <summary>
     /// 创建插件实例。
@@ -268,7 +272,6 @@ public class AutoFish : TerrariaPlugin
         GeneralHooks.ReloadEvent += ReloadConfig;
         GetDataHandlers.NewProjectile += ProjectNew!;
         GetDataHandlers.NewProjectile += BuffUpdate!;
-        ServerApi.Hooks.ServerJoin.Register(this, OnJoin);
         GetDataHandlers.PlayerUpdate.Register(OnPlayerUpdate);
         ServerApi.Hooks.ProjectileAIUpdate.Register(this, ProjectAiUpdate);
         TShockAPI.Commands.ChatCommands.Add(new Command("autofish", Commands.Afs, "af", "autofish"));
@@ -284,7 +287,6 @@ public class AutoFish : TerrariaPlugin
             GeneralHooks.ReloadEvent -= ReloadConfig;
             GetDataHandlers.NewProjectile -= ProjectNew!;
             GetDataHandlers.NewProjectile -= BuffUpdate!;
-            ServerApi.Hooks.ServerJoin.Deregister(this, OnJoin);
             GetDataHandlers.PlayerUpdate.UnRegister(OnPlayerUpdate);
             ServerApi.Hooks.ProjectileAIUpdate.Deregister(this, ProjectAiUpdate);
             TShockAPI.Commands.ChatCommands.RemoveAll(x => x.CommandDelegate == Commands.Afs);
@@ -315,30 +317,22 @@ public class AutoFish : TerrariaPlugin
     }
 
     /// <summary>玩家数据集合。</summary>
-    internal static PlayerData Data = new();
+    internal static PlayerData PlayerData = new();
 
     /// <summary>
-    /// 玩家进入服务器时初始化其自动钓鱼配置。
+    /// 默认玩家数据工厂，基于当前配置初始化。
     /// </summary>
-    private void OnJoin(JoinEventArgs args)
+    internal static PlayerData.ItemData CreateDefaultPlayerData(string playerName)
     {
-        if (args == null || !Config.Enabled) return;
-
-        var plr = TShock.Players[args.Who];
-
-        if (plr == null) return;
-
-        // 如果玩家不在数据表中，则创建新的数据条目
-        if (!Data.Items.ContainsKey(plr.Name))
-            Data.Items[plr.Name] = new PlayerData.ItemData
-            {
-                Name = plr.Name,
-                Enabled = true,
-                Buff = true,
-                Mod = false,
-                HookMax = Config.HookMax,
-                MoreHook = Config.MoreHook
-            };
+        return new PlayerData.ItemData
+        {
+            Name = playerName,
+            Enabled = true,
+            Buff = true,
+            Mod = false,
+            HookMax = Config.HookMax,
+            MoreHook = Config.MoreHook
+        };
     }
 
     /// <summary>需要关闭钓鱼权限的玩家计数。</summary>

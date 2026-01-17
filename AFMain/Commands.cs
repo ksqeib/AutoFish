@@ -73,12 +73,7 @@ public class Commands
 
         if (!AutoFish.Config.Enabled) return;
 
-        if (!AutoFish.Data.Items.TryGetValue(plr.Name, out var data) || data == null)
-        {
-            args.Player.SendInfoMessage("请用角色[c/D95065:重进服务器]后输入：/af 指令查看菜单\n羽学声明：本插件纯属[c/7E93DE:免费]请勿上当受骗", 217,
-                217, 217);
-            return;
-        }
+        var data = AutoFish.PlayerData.GetOrCreatePlayerData(plr.Name, AutoFish.CreateDefaultPlayerData);
 
         //消耗模式下的剩余时间记录
         var Minutes = AutoFish.Config.timer - (DateTime.Now - data.LogTime).TotalMinutes;
