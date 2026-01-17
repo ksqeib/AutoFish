@@ -17,63 +17,37 @@ public class Commands
     /// </summary>
     private static void HelpCmd(TSPlayer player)
     {
-        if (player == null)
+        var helpMessage = new StringBuilder();
+        helpMessage.Append("          [i:3455][c/AD89D5:自][c/D68ACA:动][c/DF909A:钓][c/E5A894:鱼][i:3454]");
+
+        // 个人指令
+        helpMessage.Append("\n/af -- 查看自动钓鱼菜单");
+        helpMessage.Append("\n/af status -- 查看个人状态");
+        helpMessage.Append("\n/af on 或 off -- 自动钓鱼[c/4686D4:开启]|[c/F25055:关闭]功能");
+        helpMessage.Append("\n/af buff -- 开启丨关闭[c/F6B152:钓鱼BUFF]");
+
+        if (AutoFish.Config.ConsumptionModeEnabled)
+            helpMessage.Append("\n/af list -- 列出消耗模式[c/F5F251:指定物品表]");
+
+        if (AutoFish.Config.ExtraCatchItemIds.Count != 0)
+            helpMessage.Append("\n/af loot -- 查看[c/F25055:额外渔获表]");
+
+        // 管理员附加指令（末尾追加，避免遮挡玩家指令）
+        if (player.HasPermission("autofish.admin"))
         {
+            helpMessage.Append("\n[全局] /af gbuff -- 开启丨关闭全局钓鱼BUFF");
+            helpMessage.Append("\n[全局] /af gmore -- 开启丨关闭多线模式");
+            helpMessage.Append("\n[全局] /af gduo 数字 -- 设置多线的钩子数量上限");
+            helpMessage.Append("\n[全局] /af gmod -- 开启丨关闭消耗模式");
+            helpMessage.Append("\n[全局] /af gset 数量 -- 设置消耗物品数量要求");
+            helpMessage.Append("\n[全局] /af gtime 数字 -- 设置自动时长(分钟)");
+            helpMessage.Append("\n[全局] /af gadd 物品名 -- 添加指定鱼饵");
+            helpMessage.Append("\n[全局] /af gdel 物品名 -- 移除指定鱼饵");
+            helpMessage.Append("\n[全局] /af gaddloot 物品名 -- 添加额外渔获");
+            helpMessage.Append("\n[全局] /af gdelloot 物品名 -- 移除额外渔获");
         }
-        else
-        {
-            //普通玩家
-            if (!player.HasPermission("autofish.admin"))
-            {
-                var helpMessage = new StringBuilder();
-                helpMessage.AppendFormat("          [i:3455][c/AD89D5:自][c/D68ACA:动][c/DF909A:钓][c/E5A894:鱼][i:3454]");
 
-
-                helpMessage.AppendFormat("\n/af -- 查看自动钓鱼菜单\n" +
-                                         "/af status -- 查看个人状态\n" +
-                                         "/af on -- 自动钓鱼[c/4686D4:开启]功能\n" +
-                                         "/af off -- 自动钓鱼[c/F25055:关闭]功能\n" +
-                                         "/af buff -- 开启丨关闭[c/F6B152:钓鱼BUFF]");
-
-                if (AutoFish.Config.ExtraCatchItemIds.Any())
-                    helpMessage.AppendFormat("\n/af loot -- 查看[c/F25055:额外渔获表]");
-
-                if (AutoFish.Config.ConsumptionModeEnabled)
-                    helpMessage.AppendFormat("\n/af list -- 列出消耗模式[c/F5F251:指定物品表]");
-
-                player.SendMessage(helpMessage.ToString(), 193, 223, 186);
-            }
-
-            //管理员
-            else
-            {
-                var helpMessage = new StringBuilder();
-                helpMessage.AppendFormat("          [i:3455][c/AD89D5:自][c/D68ACA:动][c/DF909A:钓][c/E5A894:鱼][i:3454]");
-
-                helpMessage.AppendFormat("\n[个人] /af status -- 查看个人状态\n" +
-                                         "[个人] /af on 或 off -- 自动钓鱼[c/4686D4:开启]|[c/F25055:关闭]功能\n" +
-                                         "[个人] /af buff -- 开启丨关闭[c/F6B152:钓鱼BUFF]");
-
-                if (AutoFish.Config.ConsumptionModeEnabled)
-                    helpMessage.AppendFormat("\n[个人] /af list -- 列出消耗[c/F5F251:指定物品表]");
-
-                helpMessage.AppendFormat("\n[个人] /af loot -- 查看[c/F25055:额外渔获表]");
-
-                // 全局配置放在末尾并以 g 前缀标识
-                helpMessage.AppendFormat("\n[全局] /af gbuff -- 开启丨关闭全局钓鱼BUFF\n" +
-                                         "[全局] /af gmore -- 开启丨关闭多线模式\n" +
-                                         "[全局] /af gduo 数字 -- 设置多线的钩子数量上限\n" +
-                                         "[全局] /af gmod -- 开启丨关闭消耗模式\n" +
-                                         "[全局] /af gset 数量 -- 设置消耗物品数量要求\n" +
-                                         "[全局] /af gtime 数字 -- 设置自动时长(分钟)\n" +
-                                         "[全局] /af gadd 物品名 -- 添加指定鱼饵\n" +
-                                         "[全局] /af gdel 物品名 -- 移除指定鱼饵\n" +
-                                         "[全局] /af gaddloot 物品名 -- 添加额外渔获\n" +
-                                         "[全局] /af gdelloot 物品名 -- 移除额外渔获");
-
-                player.SendMessage(helpMessage.ToString(), 193, 223, 186);
-            }
-        }
+        player.SendMessage(helpMessage.ToString(), 193, 223, 186);
     }
 
     /// <summary>
