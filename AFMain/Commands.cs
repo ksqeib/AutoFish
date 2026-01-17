@@ -104,6 +104,11 @@ public class Commands
         {
             if (args.Parameters[0].ToLower() == "on")
             {
+                if (!AutoFish.HasFeaturePermission(player, "autofish.fish"))
+                {
+                    args.Player.SendErrorMessage("你没有权限开启自动钓鱼。");
+                    return;
+                }
                 playerData.AutoFishEnabled = true;
                 args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:启用]自动钓鱼功能。");
                 return;
@@ -118,7 +123,7 @@ public class Commands
 
             if (args.Parameters[0].ToLower() == "buff")
             {
-                if (!(player.HasPermission("autofish.buff") || player.HasPermission("autofish.admin")))
+                if (!AutoFish.HasFeaturePermission(player, "autofish.buff"))
                 {
                     args.Player.SendErrorMessage("你没有权限使用自动钓鱼BUFF功能。");
                     return;

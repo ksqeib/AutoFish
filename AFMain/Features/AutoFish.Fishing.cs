@@ -20,6 +20,7 @@ public partial class AutoFish
         if (!args.Projectile.active) return;
         if (!args.Projectile.bobber) return;
         if (!Config.PluginEnabled) return;
+        if (!Config.AutoFishFeatureEnabled) return;
 
         var player = TShock.Players[args.Projectile.owner];
         if (player == null) return;

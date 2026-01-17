@@ -43,20 +43,27 @@ public partial class AutoFish : TerrariaPlugin
     {
         // Attempt to resolve current player to seed defaults from permissions
         var player = TShock.Players.FirstOrDefault(p => p != null && p.Active &&
-                                p.Name.Equals(playerName, StringComparison.OrdinalIgnoreCase));
+                                                        p.Name.Equals(playerName, StringComparison.OrdinalIgnoreCase));
 
-        var canBuff = player != null && (player.HasPermission("autofish.buff") || player.HasPermission("autofish.admin"));
-        var canMulti = player != null && (player.HasPermission("autofish.multihook") || player.HasPermission("autofish.admin"));
+        var canBuff = HasFeaturePermission(player, "autofish.buff");
+        var canMulti = HasFeaturePermission(player, "autofish.multihook");
+        var canFish = HasFeaturePermission(player, "autofish.fish");
 
         return new AFPlayerData.ItemData
         {
             Name = playerName,
-            AutoFishEnabled = true,
-            BuffEnabled = canBuff,
+            AutoFishEnabled = Config.AutoFishFeatureEnabled && canFish,
+            BuffEnabled = canBuff && Config.GlobalBuffEnabled,
             ConsumptionEnabled = false,
             HookMaxNum = Config.MultiHookMaxNum,
-            MultiHookEnabled = canMulti
+            MultiHookEnabled = canMulti && Config.MultiHookEnabled
         };
+    }
+
+    /// <summary>统一的权限检查，支持admin全覆盖。</summary>
+    internal static bool HasFeaturePermission(TSPlayer? player, string permission)
+    {
+        return player != null && (player.HasPermission(permission) || player.HasPermission("autofish.admin"));
     }
 
     /// <summary>
