@@ -8,9 +8,9 @@ public partial class AutoFish
     /// <summary>
     ///     为满足条件的玩家在钓鱼时施加 Buff。
     /// </summary>
-    public void BuffUpdate(object sender, GetDataHandlers.NewProjectileEventArgs e)
+    public void BuffUpdate(object sender, GetDataHandlers.NewProjectileEventArgs args)
     {
-        var player = e.Player;
+        var player = args.Player;
 
         if (player == null) return;
         if (!player.Active) return;
@@ -20,11 +20,11 @@ public partial class AutoFish
 
         // 从数据表中获取与玩家名字匹配的配置项
         var playerData = PlayerData.GetOrCreatePlayerData(player.Name, CreateDefaultPlayerData);
-        if (!playerData.Buff) return;
+        if (!playerData.BuffEnabled) return;
 
         //出现鱼钩摆动就给玩家施加buff
-        if (!playerData.Enabled) return;
-        if (!Tools.BobbersActive(e.Owner)) return;
+        if (!playerData.AutoFishEnabled) return;
+        if (!Tools.BobbersActive(args.Owner)) return;
 
         foreach (var buff in Config.BuffID)
             player.SetBuff(buff.Key, buff.Value);

@@ -51,11 +51,11 @@ public partial class AutoFish : TerrariaPlugin
         return new AFPlayerData.ItemData
         {
             Name = playerName,
-            Enabled = true,
-            Buff = canBuff,
-            Mod = false,
-            HookMax = Config.HookMax,
-            MoreHook = canMulti
+            AutoFishEnabled = true,
+            BuffEnabled = canBuff,
+            ConsumptionEnabled = false,
+            HookMaxNum = Config.HookMax,
+            MultiHookEnabled = canMulti
         };
     }
 

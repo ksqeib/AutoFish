@@ -15,24 +15,24 @@ public partial class AutoFish
     /// <summary>
     ///     消耗模式下根据玩家物品开启或关闭自动钓鱼。
     /// </summary>
-    private void OnPlayerUpdate(object? sender, GetDataHandlers.PlayerUpdateEventArgs e)
+    private void OnPlayerUpdate(object? sender, GetDataHandlers.PlayerUpdateEventArgs args)
     {
-        var player = e.Player;
+        var player = args.Player;
         if (!Config.Enabled) return;
         if (!Config.ConMod) return;
-        if (e == null) return;
+        if (args == null) return;
         if (player == null) return;
         if (!player.IsLoggedIn) return;
         if (!player.Active) return;
 
         var playerData = PlayerData.GetOrCreatePlayerData(player.Name, CreateDefaultPlayerData);
-        if (!playerData.Enabled) return;
+        if (!playerData.AutoFishEnabled) return;
 
         // 播报玩家消耗鱼饵用的
         var consumedItemsMessage = new StringBuilder();
 
         //当玩家的自动钓鱼没开启时
-        if (!playerData.Mod)
+        if (!playerData.ConsumptionEnabled)
         {
             //初始化一个消耗值
             var requiredBait = Config.BaitStack;
@@ -75,14 +75,14 @@ public partial class AutoFish
                 // 消耗值清空时，开启自动钓鱼开关
                 if (requiredBait <= 0)
                 {
-                    playerData.Mod = true;
+                    playerData.ConsumptionEnabled = true;
                     playerData.LogTime = DateTime.Now;
                     player.SendMessage($"玩家 [c/46C2D4:{player.Name}] 已开启[c/F5F251:自动钓鱼] 消耗物品为:{consumedItemsMessage}", 247, 244, 150);
                 }
             }
         }
 
-        else //当 data.Mod 开启时
+        else //当消费模式开关已开启时
         {
             //由它判断关闭自动钓鱼
             ExitMod(player, playerData);
@@ -105,7 +105,7 @@ public partial class AutoFish
         if (minutesElapsed >= Config.timer)
         {
             ClearCount++;
-            playerData.Mod = false;
+            playerData.ConsumptionEnabled = false;
             playerData.LogTime = default; // 清空记录时间
             expiredMessage.AppendFormat("[c/A7DDF0:{0}]:[c/74F3C9:{1}分钟]", playerData.Name, Math.Floor(minutesElapsed));
         }

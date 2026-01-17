@@ -26,10 +26,10 @@ public partial class AutoFish
 
         // 从数据表中获取与玩家名字匹配的配置项
         var playerData = PlayerData.GetOrCreatePlayerData(player.Name, CreateDefaultPlayerData);
-        if (!playerData.Enabled) return;
+        if (!playerData.AutoFishEnabled) return;
 
         // 正常状态下与消耗模式下启用自动钓鱼
-        if (Config.ConMod && !playerData.Mod) return;
+        if (Config.ConMod && !playerData.ConsumptionEnabled) return;
 
         //检测是不是生成，是生成boss就不钓起来
         if (!(args.Projectile.ai[1] < 0)) return;

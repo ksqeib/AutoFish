@@ -11,11 +11,11 @@ public partial class AutoFish
     /// <summary>
     ///     处理多线钓鱼，派生额外的鱼线弹幕。
     /// </summary>
-    public void ProjectNew(object sender, GetDataHandlers.NewProjectileEventArgs e)
+    public void ProjectNew(object sender, GetDataHandlers.NewProjectileEventArgs args)
     {
-        var player = e.Player;
+        var player = args.Player;
         var guid = Guid.NewGuid().ToString();
-        var hookCount = Main.projectile.Count(p => p.active && p.owner == e.Owner && p.bobber); // 浮漂计数
+        var hookCount = Main.projectile.Count(p => p.active && p.owner == args.Owner && p.bobber); // 浮漂计数
 
         if (player == null) return;
         if (!player.Active) return;
@@ -26,19 +26,18 @@ public partial class AutoFish
 
         // 从数据表中获取与玩家名字匹配的配置项
         var playerData = PlayerData.GetOrCreatePlayerData(player.Name, CreateDefaultPlayerData);
-        if (!playerData.Enabled) return;
+        if (!playerData.AutoFishEnabled) return;
 
         // 正常状态下与消耗模式下启用多线钓鱼
-        if (!Config.ConMod || (Config.ConMod && playerData.Mod))
-            // 检查是否上钩
-            if (Tools.BobbersActive(e.Owner))
-            {
-                var index = SpawnProjectile.NewProjectile(Main.projectile[e.Index].GetProjectileSource_FromThis(),
-                    e.Position, e.Velocity, e.Type, e.Damage, e.Knockback, e.Owner, 0, 0, 0, -1, guid);
-                player.SendData(PacketTypes.ProjectileNew, "", index);
+        if (Config.ConMod && (!Config.ConMod || !playerData.ConsumptionEnabled)) return;
+        // 检查是否上钩
+        if (!Tools.BobbersActive(args.Owner)) return;
+        
+        var index = SpawnProjectile.NewProjectile(Main.projectile[args.Index].GetProjectileSource_FromThis(),
+            args.Position, args.Velocity, args.Type, args.Damage, args.Knockback, args.Owner, 0, 0, 0, -1, guid);
+        player.SendData(PacketTypes.ProjectileNew, "", index);
 
-                // 更新多线计数
-                hookCount++;
-            }
+        // 更新多线计数
+        hookCount++;
     }
 }

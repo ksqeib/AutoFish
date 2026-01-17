@@ -85,7 +85,7 @@ public class Commands
         {
             HelpCmd(args.Player);
 
-            if (!playerData.Enabled)
+            if (!playerData.AutoFishEnabled)
                 args.Player.SendSuccessMessage("请输入该指令开启→: [c/92C5EC:/af on]");
 
             //开启了消耗模式
@@ -104,14 +104,14 @@ public class Commands
         {
             if (args.Parameters[0].ToLower() == "on")
             {
-                playerData.Enabled = true;
+                playerData.AutoFishEnabled = true;
                 args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:启用]自动钓鱼功能。");
                 return;
             }
 
             if (args.Parameters[0].ToLower() == "off")
             {
-                playerData.Enabled = false;
+                playerData.AutoFishEnabled = false;
                 args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:禁用]自动钓鱼功能。");
                 return;
             }
@@ -124,8 +124,8 @@ public class Commands
                     return;
                 }
 
-                var isEnabled = playerData.Buff;
-                playerData.Buff = !isEnabled;
+                var isEnabled = playerData.BuffEnabled;
+                playerData.BuffEnabled = !isEnabled;
                     var toggleText = isEnabled ? "禁用" : "启用";
                     args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{toggleText}]自动钓鱼BUFF");
                 return;

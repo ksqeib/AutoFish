@@ -35,35 +35,34 @@ public class AFPlayerData
     /// </summary>
     public class ItemData
     {
-        public ItemData(string name = "", bool enabled = true, bool mod = true, bool buff = false, int hookMax = 3,
-            bool moreHook = false)
+        public ItemData(string name = "", bool autoFishEnabled = true, bool consumptionEnabled = true,
+            bool buffEnabled = false, int hookMaxNum = 3, bool multiHookEnabled = false)
         {
             Name = name ?? "";
-            Enabled = enabled;
-            Mod = mod;
-            Buff = buff;
-            HookMax = hookMax;
-            MoreHook = moreHook;
+            AutoFishEnabled = autoFishEnabled;
+            ConsumptionEnabled = consumptionEnabled;
+            BuffEnabled = buffEnabled;
+            HookMaxNum = hookMaxNum;
+            MultiHookEnabled = multiHookEnabled;
         }
 
         //玩家名字
         public string Name { get; set; }
 
-        //玩家开关
-        public bool Enabled { get; set; }
+        //总开关
+        public bool AutoFishEnabled { get; set; }
 
         //消耗模式开关
-        public bool Mod { get; set; }
+        public bool ConsumptionEnabled { get; set; }
 
         //BUFF开关
-        public bool Buff { get; set; }
+        public bool BuffEnabled { get; set; }
 
-        //鱼线数量
-        public int HookMax { get; set; } = 3;
+        //鱼线数量上限
+        public int HookMaxNum { get; set; } = 3;
 
-
-        //鱼线数量
-        public bool MoreHook { get; set; } = true;
+        //多钩开关
+        public bool MultiHookEnabled { get; set; } = true;
 
         //记录时间
         public DateTime LogTime { get; set; }
