@@ -23,8 +23,10 @@ public class Commands
         // 个人指令
         helpMessage.Append("\n/af -- 查看自动钓鱼菜单");
         helpMessage.Append("\n/af status -- 查看个人状态");
-        helpMessage.Append("\n/af on 或 off -- 自动钓鱼[c/4686D4:开启]|[c/F25055:关闭]功能");
+        helpMessage.Append("\n/af fish -- 开启丨关闭[c/4686D4:自动钓鱼]功能");
         helpMessage.Append("\n/af buff -- 开启丨关闭[c/F6B152:钓鱼BUFF]");
+        helpMessage.Append("\n/af multi -- 开启丨关闭[c/87DF86:多钩功能] (需全局启用)");
+        helpMessage.Append("\n/af hook 数字 -- 设置个人钩子上限 (<= 全局上限)");
 
         if (AutoFish.Config.ConsumptionModeEnabled)
             helpMessage.Append("\n/af list -- 列出消耗模式[c/F5F251:指定物品表]");
@@ -69,7 +71,7 @@ public class Commands
             HelpCmd(args.Player);
 
             if (!playerData.AutoFishEnabled)
-                args.Player.SendSuccessMessage("请输入该指令开启→: [c/92C5EC:/af on]");
+                args.Player.SendSuccessMessage("请输入该指令开启→: [c/92C5EC:/af fish]");
 
             //开启了消耗模式
             else if (AutoFish.Config.ConsumptionModeEnabled)
@@ -78,7 +80,7 @@ public class Commands
 
             //检测到血月
             if (Main.bloodMoon)
-                args.Player.SendMessage("当前为[c/F25055:血月]无法钓上怪物，可[c/46C4D4:关闭]插件：[c/F3F292:/af off]", 243, 181,
+                args.Player.SendMessage("当前为[c/F25055:血月]无法钓上怪物，可[c/46C4D4:关闭]插件：[c/F3F292:/af fish]", 243, 181,
                     145);
 
             return;
@@ -118,56 +120,115 @@ public class Commands
 
     private static bool HandlePlayerCommand(CommandArgs args, AFPlayerData.ItemData playerData, double remainingMinutes)
     {
-        if (args.Parameters.Count != 1) return false;
-
         var player = args.Player;
         var sub = args.Parameters[0].ToLower();
 
-        switch (sub)
+        if (args.Parameters.Count == 1)
         {
-            case "on":
-                if (!AutoFish.HasFeaturePermission(player, "autofish.fish"))
-                {
-                    args.Player.SendErrorMessage("你没有权限开启自动钓鱼。");
-                    return true;
-                }
+            switch (sub)
+            {
+                case "fish":
+                    if (!AutoFish.HasFeaturePermission(player, "autofish.fish"))
+                    {
+                        args.Player.SendErrorMessage("你没有权限使用自动钓鱼功能。");
+                        return true;
+                    }
 
-                playerData.AutoFishEnabled = true;
-                args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:启用]自动钓鱼功能。");
-                return true;
-            case "off":
-                playerData.AutoFishEnabled = false;
-                args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:禁用]自动钓鱼功能。");
-                return true;
-            case "buff":
-                if (!AutoFish.HasFeaturePermission(player, "autofish.buff"))
-                {
-                    args.Player.SendErrorMessage("你没有权限使用自动钓鱼BUFF功能。");
+                    var fishEnabled = playerData.AutoFishEnabled;
+                    playerData.AutoFishEnabled = !fishEnabled;
+                    args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{(fishEnabled ? "禁用" : "启用")}]自动钓鱼功能。");
                     return true;
-                }
+                case "buff":
+                    if (!AutoFish.HasFeaturePermission(player, "autofish.buff"))
+                    {
+                        args.Player.SendErrorMessage("你没有权限使用自动钓鱼BUFF功能。");
+                        return true;
+                    }
 
-                var isEnabled = playerData.BuffEnabled;
-                playerData.BuffEnabled = !isEnabled;
-                args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{(isEnabled ? "禁用" : "启用")}]自动钓鱼BUFF");
-                return true;
-            case "status":
-                SendStatus(args.Player, playerData, remainingMinutes);
-                return true;
-            case "list" when AutoFish.Config.ConsumptionModeEnabled:
-                args.Player.SendInfoMessage("[指定消耗物品表]\n" + string.Join(", ",
-                    AutoFish.Config.BaitItemIds.Select(x =>
-                        TShock.Utils.GetItemById(x).Name + "([c/92C5EC:{0}])".SFormat(x))));
-                args.Player.SendSuccessMessage(
-                    $"兑换规则为：每[c/F5F252:{AutoFish.Config.BaitConsumeCount}]个 => [c/92C5EC:{AutoFish.Config.RewardDurationMinutes}]分钟");
-                return true;
-            case "loot" when AutoFish.Config.ExtraCatchItemIds.Any():
-                args.Player.SendInfoMessage("[额外渔获表]\n" + string.Join(", ",
-                    AutoFish.Config.ExtraCatchItemIds.Select(x =>
-                        TShock.Utils.GetItemById(x).Name + "([c/92C5EC:{0}])".SFormat(x))));
-                return true;
-            default:
-                return false;
+                    var isEnabled = playerData.BuffEnabled;
+                    playerData.BuffEnabled = !isEnabled;
+                    args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{(isEnabled ? "禁用" : "启用")}]自动钓鱼BUFF");
+                    return true;
+                case "multi":
+                    if (!AutoFish.HasFeaturePermission(player, "autofish.multihook"))
+                    {
+                        args.Player.SendErrorMessage("你没有权限使用多钩功能。");
+                        return true;
+                    }
+
+                    if (!AutoFish.Config.MultiHookEnabled)
+                    {
+                        args.Player.SendWarningMessage("多钩功能未在全局开启，无法切换。");
+                        return true;
+                    }
+
+                    playerData.MultiHookEnabled = !playerData.MultiHookEnabled;
+                    args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{(playerData.MultiHookEnabled ? "启用" : "禁用")}]多钩功能。");
+                    return true;
+                case "status":
+                    SendStatus(args.Player, playerData, remainingMinutes);
+                    return true;
+                case "list" when AutoFish.Config.ConsumptionModeEnabled:
+                    args.Player.SendInfoMessage("[指定消耗物品表]\n" + string.Join(", ",
+                        AutoFish.Config.BaitItemIds.Select(x =>
+                            TShock.Utils.GetItemById(x).Name + "([c/92C5EC:{0}])".SFormat(x))));
+                    args.Player.SendSuccessMessage(
+                        $"兑换规则为：每[c/F5F252:{AutoFish.Config.BaitConsumeCount}]个 => [c/92C5EC:{AutoFish.Config.RewardDurationMinutes}]分钟");
+                    return true;
+                case "loot" when AutoFish.Config.ExtraCatchItemIds.Any():
+                    args.Player.SendInfoMessage("[额外渔获表]\n" + string.Join(", ",
+                        AutoFish.Config.ExtraCatchItemIds.Select(x =>
+                            TShock.Utils.GetItemById(x).Name + "([c/92C5EC:{0}])".SFormat(x))));
+                    return true;
+                default:
+                    return false;
+            }
         }
+
+        if (args.Parameters.Count == 2)
+        {
+            switch (sub)
+            {
+                case "hook":
+                    if (!AutoFish.HasFeaturePermission(args.Player, "autofish.multihook"))
+                    {
+                        args.Player.SendErrorMessage("你没有权限设置钩子上限。");
+                        return true;
+                    }
+
+                    if (!AutoFish.Config.MultiHookEnabled)
+                    {
+                        args.Player.SendWarningMessage("多钩功能未在全局开启，无法设置钩子数量。");
+                        return true;
+                    }
+
+                    if (!int.TryParse(args.Parameters[1], out var personalMax))
+                    {
+                        args.Player.SendErrorMessage("请输入数字，格式：/af hook 数字");
+                        return true;
+                    }
+
+                    if (personalMax < 1)
+                    {
+                        args.Player.SendWarningMessage("钩子数量必须大于等于 1。");
+                        return true;
+                    }
+
+                    if (personalMax > AutoFish.Config.MultiHookMaxNum)
+                    {
+                        args.Player.SendWarningMessage($"已限制为全局上限：{AutoFish.Config.MultiHookMaxNum}。");
+                        personalMax = AutoFish.Config.MultiHookMaxNum;
+                    }
+
+                    playerData.HookMaxNum = personalMax;
+                    args.Player.SendSuccessMessage($"已将个人钩子上限设置为：{personalMax} (全局上限 {AutoFish.Config.MultiHookMaxNum})");
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        return false;
     }
 
     private static bool HandleAdminCommand(CommandArgs args, AFPlayerData.ItemData playerData)
