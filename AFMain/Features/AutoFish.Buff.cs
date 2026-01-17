@@ -23,7 +23,6 @@ public partial class AutoFish
         if (!playerData.BuffEnabled) return;
 
         //出现鱼钩摆动就给玩家施加buff
-        if (!playerData.AutoFishEnabled) return;
         if (!Tools.BobbersActive(args.Owner)) return;
 
         foreach (var buff in Config.BuffDurations)

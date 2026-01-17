@@ -36,8 +36,5 @@ public partial class AutoFish
         var index = SpawnProjectile.NewProjectile(Main.projectile[args.Index].GetProjectileSource_FromThis(),
             args.Position, args.Velocity, args.Type, args.Damage, args.Knockback, args.Owner, 0, 0, 0, -1, guid);
         player.SendData(PacketTypes.ProjectileNew, "", index);
-
-        // 更新多线计数
-        hookCount++;
     }
 }
