@@ -23,7 +23,6 @@ public partial class AutoFish
             !plr.IsLoggedIn ||
             !Config.Enabled ||
             !Config.MoreHook ||
-            !plr.HasPermission("autofish") ||
             HookCount > Config.HookMax - 1)
             return;
 

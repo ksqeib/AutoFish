@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Terraria;
 using TerrariaApi.Server;
 using TShockAPI;
@@ -40,14 +41,21 @@ public partial class AutoFish : TerrariaPlugin
     /// </summary>
     internal static AFPlayerData.ItemData CreateDefaultPlayerData(string playerName)
     {
+        // Attempt to resolve current player to seed defaults from permissions
+        var plr = TShock.Players.FirstOrDefault(p => p != null && p.Active &&
+                                                    p.Name.Equals(playerName, StringComparison.OrdinalIgnoreCase));
+
+        var canBuff = plr != null && (plr.HasPermission("autofish.buff") || plr.HasPermission("autofish.admin"));
+        var canMulti = plr != null && (plr.HasPermission("autofish.multihook") || plr.HasPermission("autofish.admin"));
+
         return new AFPlayerData.ItemData
         {
             Name = playerName,
             Enabled = true,
-            Buff = true,
+            Buff = canBuff,
             Mod = false,
             HookMax = Config.HookMax,
-            MoreHook = Config.MoreHook
+            MoreHook = canMulti
         };
     }
     /// <summary>

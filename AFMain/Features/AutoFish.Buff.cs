@@ -12,8 +12,7 @@ public partial class AutoFish
     {
         var plr = e.Player;
 
-        if (plr == null || !plr.Active || !plr.IsLoggedIn || !Config.Enabled || !Config.BuffEnabled ||
-            !plr.HasPermission("autofish")) return;
+        if (plr == null || !plr.Active || !plr.IsLoggedIn || !Config.Enabled || !Config.BuffEnabled) return;
 
         // 从数据表中获取与玩家名字匹配的配置项
         var list = PlayerData.GetOrCreatePlayerData(plr.Name, CreateDefaultPlayerData);

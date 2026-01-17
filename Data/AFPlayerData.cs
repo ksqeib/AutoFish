@@ -37,8 +37,8 @@ public class AFPlayerData
     /// </summary>
     public class ItemData
     {
-        public ItemData(string name = "", bool enabled = true, bool mod = true, bool buff = true, int hookMax = 3,
-            bool moreHook = true)
+        public ItemData(string name = "", bool enabled = true, bool mod = true, bool buff = false, int hookMax = 3,
+            bool moreHook = false)
         {
             Name = name ?? "";
             Enabled = enabled;

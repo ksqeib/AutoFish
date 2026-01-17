@@ -21,7 +21,7 @@ public partial class AutoFish
             return;
 
         var plr = TShock.Players[args.Projectile.owner];
-        if (plr == null || !plr.Active || !plr.HasPermission("autofish"))
+        if (plr == null || !plr.Active)
             return;
 
         // 从数据表中获取与玩家名字匹配的配置项

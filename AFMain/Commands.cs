@@ -116,6 +116,12 @@ public class Commands
 
             if (args.Parameters[0].ToLower() == "buff")
             {
+                if (!(plr.HasPermission("autofish.buff") || plr.HasPermission("autofish.admin")))
+                {
+                    args.Player.SendErrorMessage("你没有权限使用自动钓鱼BUFF功能。");
+                    return;
+                }
+
                 var isEnabled = data.Buff;
                 data.Buff = !isEnabled;
                 var Mess = isEnabled ? "禁用" : "启用";

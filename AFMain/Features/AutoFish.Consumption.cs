@@ -19,8 +19,7 @@ public partial class AutoFish
     {
         var plr = e.Player;
         if (!Config.Enabled || !Config.ConMod || e == null ||
-            plr == null || !plr.IsLoggedIn || !plr.Active ||
-            !plr.HasPermission("autofish"))
+            plr == null || !plr.IsLoggedIn || !plr.Active)
             return;
 
         var data = PlayerData.GetOrCreatePlayerData(plr.Name, CreateDefaultPlayerData);

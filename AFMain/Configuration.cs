@@ -32,7 +32,7 @@ internal class Configuration
 
     [JsonProperty("插件开关", Order = -13)] public bool Enabled { get; set; } = true;
 
-    [JsonProperty("多钩钓鱼", Order = -12)] public bool MoreHook { get; set; } = true;
+    [JsonProperty("多钩钓鱼", Order = -12)] public bool MoreHook { get; set; } = false;
 
     [JsonProperty("随机物品", Order = -11)] public bool Random { get; set; } = false;
 
