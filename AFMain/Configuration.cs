@@ -34,7 +34,7 @@ internal class Configuration
 
     [JsonProperty("多钩钓鱼", Order = -12)] public bool MoreHook { get; set; } = true;
 
-    [JsonProperty("随机物品", Order = -11)] public bool Random { get; set; }
+    [JsonProperty("随机物品", Order = -11)] public bool Random { get; set; } = false;
 
     [JsonProperty("多钩上限", Order = -10)] public int HookMax { get; set; } = 5;
 
