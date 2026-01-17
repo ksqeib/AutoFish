@@ -84,211 +84,13 @@ public class Commands
             return;
         }
 
-        if (args.Parameters.Count == 1)
-        {
-            var sub = args.Parameters[0].ToLower();
-            switch (sub)
-            {
-                case "on":
-                    if (!AutoFish.HasFeaturePermission(player, "autofish.fish"))
-                    {
-                        args.Player.SendErrorMessage("你没有权限开启自动钓鱼。");
-                        return;
-                    }
+        if (HandlePlayerCommand(args, playerData, remainingMinutes))
+            return;
 
-                    playerData.AutoFishEnabled = true;
-                    args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:启用]自动钓鱼功能。");
-                    return;
-                case "off":
-                    playerData.AutoFishEnabled = false;
-                    args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:禁用]自动钓鱼功能。");
-                    return;
-                case "buff":
-                    if (!AutoFish.HasFeaturePermission(player, "autofish.buff"))
-                    {
-                        args.Player.SendErrorMessage("你没有权限使用自动钓鱼BUFF功能。");
-                        return;
-                    }
+        if (HandleAdminCommand(args, playerData))
+            return;
 
-                    var isEnabled = playerData.BuffEnabled;
-                    playerData.BuffEnabled = !isEnabled;
-                    args.Player.SendSuccessMessage(
-                        $"玩家 [{args.Player.Name}] 已[c/92C5EC:{(isEnabled ? "禁用" : "启用")}]自动钓鱼BUFF");
-                    return;
-                case "status":
-                    SendStatus(args.Player, playerData, remainingMinutes);
-                    return;
-                case "list" when AutoFish.Config.ConsumptionModeEnabled:
-                    args.Player.SendInfoMessage("[指定消耗物品表]\n" + string.Join(", ",
-                        AutoFish.Config.BaitItemIds.Select(x =>
-                            TShock.Utils.GetItemById(x).Name + "([c/92C5EC:{0}])".SFormat(x))));
-                    args.Player.SendSuccessMessage(
-                        $"兑换规则为：每[c/F5F252:{AutoFish.Config.BaitConsumeCount}]个 => [c/92C5EC:{AutoFish.Config.RewardDurationMinutes}]分钟");
-                    return;
-                case "loot" when AutoFish.Config.ExtraCatchItemIds.Any():
-                    args.Player.SendInfoMessage("[额外渔获表]\n" + string.Join(", ",
-                        AutoFish.Config.ExtraCatchItemIds.Select(x =>
-                            TShock.Utils.GetItemById(x).Name + "([c/92C5EC:{0}])".SFormat(x))));
-                    return;
-            }
-
-            if (player.HasPermission("autofish.admin"))
-            {
-                switch (sub)
-                {
-                    case "gmore":
-                        var multiEnabled = AutoFish.Config.MultiHookEnabled;
-                        AutoFish.Config.MultiHookEnabled = !multiEnabled;
-                        var multiToggle = multiEnabled ? "禁用" : "启用";
-                        args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{multiToggle}]多线模式");
-                        AutoFish.Config.Write();
-                        playerData.MultiHookEnabled = AutoFish.Config.MultiHookEnabled;
-                        return;
-                    case "gbuff":
-                        var buffCfgEnabled = AutoFish.Config.GlobalBuffEnabled;
-                        AutoFish.Config.GlobalBuffEnabled = !buffCfgEnabled;
-                        var buffToggleText = buffCfgEnabled ? "禁用" : "启用";
-                        args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{buffToggleText}]全局钓鱼BUFF");
-                        AutoFish.Config.Write();
-                        return;
-                    case "gmod":
-                        var modEnabled = AutoFish.Config.ConsumptionModeEnabled;
-                        AutoFish.Config.ConsumptionModeEnabled = !modEnabled;
-                        var modToggle = modEnabled ? "禁用" : "启用";
-                        args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{modToggle}]消耗模式");
-                        AutoFish.Config.Write();
-                        return;
-                    case "gset":
-                        args.Player.SendInfoMessage($"当前消耗物品数量：{AutoFish.Config.BaitConsumeCount}，推荐：2");
-                        return;
-                    case "gtime":
-                        args.Player.SendInfoMessage($"当前消耗自动时长：{AutoFish.Config.RewardDurationMinutes}，单位：分钟，推荐：30-45");
-                        return;
-                }
-            }
-        }
-
-        //管理权限
-        if (player.HasPermission("autofish.admin") && args.Parameters.Count == 2)
-        {
-            Item item;
-            var matchedItems = TShock.Utils.GetItemByIdOrName(args.Parameters[1]);
-            if (matchedItems.Count > 1)
-            {
-                args.Player.SendMultipleMatchError(matchedItems.Select(i => i.Name));
-                return;
-            }
-
-            if (matchedItems.Count == 0)
-            {
-                args.Player.SendErrorMessage(
-                    "不存在该物品，\"物品查询\": \"[c/92C5EC:https://terraria.wiki.gg/zh/wiki/Item_IDs]\"");
-                return;
-            }
-
-            item = matchedItems[0];
-
-            switch (args.Parameters[0].ToLower())
-            {
-                case "gadd":
-                {
-                    if (AutoFish.Config.BaitItemIds.Contains(item.type))
-                    {
-                        args.Player.SendErrorMessage("物品 [c/92C5EC:{0}] 已在指定鱼饵表中!", item.Name);
-                        return;
-                    }
-
-                    AutoFish.Config.BaitItemIds.Add(item.type);
-                    AutoFish.Config.Write();
-                    args.Player.SendSuccessMessage("已成功将物品添加指定鱼饵表: [c/92C5EC:{0}]!", item.Name);
-                    break;
-                }
-
-                case "gdel":
-                {
-                    if (!AutoFish.Config.BaitItemIds.Contains(item.type))
-                    {
-                        args.Player.SendErrorMessage("物品 {0} 不在指定鱼饵表中!", item.Name);
-                        return;
-                    }
-
-                    AutoFish.Config.BaitItemIds.Remove(item.type);
-                    AutoFish.Config.Write();
-                    args.Player.SendSuccessMessage("已成功从指定鱼饵表移出物品: [c/92C5EC:{0}]!", item.Name);
-                    break;
-                }
-
-                case "gaddloot":
-                {
-                    if (AutoFish.Config.ExtraCatchItemIds.Contains(item.type))
-                    {
-                        args.Player.SendErrorMessage("物品 [c/92C5EC:{0}] 已在额外渔获表中!", item.Name);
-                        return;
-                    }
-
-                    AutoFish.Config.ExtraCatchItemIds.Add(item.type);
-                    AutoFish.Config.Write();
-                    args.Player.SendSuccessMessage("已成功将物品添加额外渔获表: [c/92C5EC:{0}]!", item.Name);
-                    break;
-                }
-
-                case "gdelloot":
-                {
-                    if (!AutoFish.Config.ExtraCatchItemIds.Contains(item.type))
-                    {
-                        args.Player.SendErrorMessage("物品 {0} 不在额外渔获中!", item.Name);
-                        return;
-                    }
-
-                    AutoFish.Config.ExtraCatchItemIds.Remove(item.type);
-                    AutoFish.Config.Write();
-                    args.Player.SendSuccessMessage("已成功从额外渔获移出物品: [c/92C5EC:{0}]!", item.Name);
-                    break;
-                }
-
-                case "gset":
-                {
-                    if (int.TryParse(args.Parameters[1], out var num))
-                    {
-                        AutoFish.Config.BaitConsumeCount = num;
-                        AutoFish.Config.Write();
-                        args.Player.SendSuccessMessage("已成功将物品数量要求设置为: [c/92C5EC:{0}] 个!", num);
-                    }
-
-                    break;
-                }
-
-                case "gduo":
-                {
-                    if (int.TryParse(args.Parameters[1], out var num))
-                    {
-                        AutoFish.Config.MultiHookMaxNum = num;
-                        AutoFish.Config.Write();
-                        args.Player.SendSuccessMessage("已成功将多钩数量上限设置为: [c/92C5EC:{0}] 个!", num);
-                    }
-
-                    break;
-                }
-
-                case "gtime":
-                {
-                    if (int.TryParse(args.Parameters[1], out var num))
-                    {
-                        AutoFish.Config.RewardDurationMinutes = num;
-                        AutoFish.Config.Write();
-                        args.Player.SendSuccessMessage("已成功将自动时长设置为: [c/92C5EC:{0}] 分钟!", num);
-                    }
-
-                    break;
-                }
-
-                default:
-                {
-                    HelpCmd(args.Player);
-                    break;
-                }
-            }
-        }
+        HelpCmd(args.Player);
     }
 
     /// <summary>
@@ -312,5 +114,202 @@ public class Commands
         }
 
         player.SendInfoMessage(sb.ToString());
+    }
+
+    private static bool HandlePlayerCommand(CommandArgs args, AFPlayerData.ItemData playerData, double remainingMinutes)
+    {
+        if (args.Parameters.Count != 1) return false;
+
+        var player = args.Player;
+        var sub = args.Parameters[0].ToLower();
+
+        switch (sub)
+        {
+            case "on":
+                if (!AutoFish.HasFeaturePermission(player, "autofish.fish"))
+                {
+                    args.Player.SendErrorMessage("你没有权限开启自动钓鱼。");
+                    return true;
+                }
+
+                playerData.AutoFishEnabled = true;
+                args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:启用]自动钓鱼功能。");
+                return true;
+            case "off":
+                playerData.AutoFishEnabled = false;
+                args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:禁用]自动钓鱼功能。");
+                return true;
+            case "buff":
+                if (!AutoFish.HasFeaturePermission(player, "autofish.buff"))
+                {
+                    args.Player.SendErrorMessage("你没有权限使用自动钓鱼BUFF功能。");
+                    return true;
+                }
+
+                var isEnabled = playerData.BuffEnabled;
+                playerData.BuffEnabled = !isEnabled;
+                args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{(isEnabled ? "禁用" : "启用")}]自动钓鱼BUFF");
+                return true;
+            case "status":
+                SendStatus(args.Player, playerData, remainingMinutes);
+                return true;
+            case "list" when AutoFish.Config.ConsumptionModeEnabled:
+                args.Player.SendInfoMessage("[指定消耗物品表]\n" + string.Join(", ",
+                    AutoFish.Config.BaitItemIds.Select(x =>
+                        TShock.Utils.GetItemById(x).Name + "([c/92C5EC:{0}])".SFormat(x))));
+                args.Player.SendSuccessMessage(
+                    $"兑换规则为：每[c/F5F252:{AutoFish.Config.BaitConsumeCount}]个 => [c/92C5EC:{AutoFish.Config.RewardDurationMinutes}]分钟");
+                return true;
+            case "loot" when AutoFish.Config.ExtraCatchItemIds.Any():
+                args.Player.SendInfoMessage("[额外渔获表]\n" + string.Join(", ",
+                    AutoFish.Config.ExtraCatchItemIds.Select(x =>
+                        TShock.Utils.GetItemById(x).Name + "([c/92C5EC:{0}])".SFormat(x))));
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private static bool HandleAdminCommand(CommandArgs args, AFPlayerData.ItemData playerData)
+    {
+        if (!args.Player.HasPermission("autofish.admin")) return false;
+
+        var sub = args.Parameters[0].ToLower();
+
+        if (args.Parameters.Count == 1)
+        {
+            switch (sub)
+            {
+                case "gmore":
+                    var multiEnabled = AutoFish.Config.MultiHookEnabled;
+                    AutoFish.Config.MultiHookEnabled = !multiEnabled;
+                    var multiToggle = multiEnabled ? "禁用" : "启用";
+                    args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{multiToggle}]多线模式");
+                    AutoFish.Config.Write();
+                    playerData.MultiHookEnabled = AutoFish.Config.MultiHookEnabled;
+                    return true;
+                case "gbuff":
+                    var buffCfgEnabled = AutoFish.Config.GlobalBuffEnabled;
+                    AutoFish.Config.GlobalBuffEnabled = !buffCfgEnabled;
+                    var buffToggleText = buffCfgEnabled ? "禁用" : "启用";
+                    args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{buffToggleText}]全局钓鱼BUFF");
+                    AutoFish.Config.Write();
+                    return true;
+                case "gmod":
+                    var modEnabled = AutoFish.Config.ConsumptionModeEnabled;
+                    AutoFish.Config.ConsumptionModeEnabled = !modEnabled;
+                    var modToggle = modEnabled ? "禁用" : "启用";
+                    args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{modToggle}]消耗模式");
+                    AutoFish.Config.Write();
+                    return true;
+                case "gset":
+                    args.Player.SendInfoMessage($"当前消耗物品数量：{AutoFish.Config.BaitConsumeCount}，推荐：2");
+                    return true;
+                case "gtime":
+                    args.Player.SendInfoMessage($"当前消耗自动时长：{AutoFish.Config.RewardDurationMinutes}，单位：分钟，推荐：30-45");
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        if (args.Parameters.Count == 2)
+        {
+            var matchedItems = TShock.Utils.GetItemByIdOrName(args.Parameters[1]);
+            if (matchedItems.Count > 1)
+            {
+                args.Player.SendMultipleMatchError(matchedItems.Select(i => i.Name));
+                return true;
+            }
+
+            if (matchedItems.Count == 0)
+            {
+                args.Player.SendErrorMessage(
+                    "不存在该物品，\"物品查询\": \"[c/92C5EC:https://terraria.wiki.gg/zh/wiki/Item_IDs]\"");
+                return true;
+            }
+
+            var item = matchedItems[0];
+
+            switch (sub)
+            {
+                case "gadd":
+                    if (AutoFish.Config.BaitItemIds.Contains(item.type))
+                    {
+                        args.Player.SendErrorMessage("物品 [c/92C5EC:{0}] 已在指定鱼饵表中!", item.Name);
+                        return true;
+                    }
+
+                    AutoFish.Config.BaitItemIds.Add(item.type);
+                    AutoFish.Config.Write();
+                    args.Player.SendSuccessMessage("已成功将物品添加指定鱼饵表: [c/92C5EC:{0}]!", item.Name);
+                    return true;
+                case "gdel":
+                    if (!AutoFish.Config.BaitItemIds.Contains(item.type))
+                    {
+                        args.Player.SendErrorMessage("物品 {0} 不在指定鱼饵表中!", item.Name);
+                        return true;
+                    }
+
+                    AutoFish.Config.BaitItemIds.Remove(item.type);
+                    AutoFish.Config.Write();
+                    args.Player.SendSuccessMessage("已成功从指定鱼饵表移出物品: [c/92C5EC:{0}]!", item.Name);
+                    return true;
+                case "gaddloot":
+                    if (AutoFish.Config.ExtraCatchItemIds.Contains(item.type))
+                    {
+                        args.Player.SendErrorMessage("物品 [c/92C5EC:{0}] 已在额外渔获表中!", item.Name);
+                        return true;
+                    }
+
+                    AutoFish.Config.ExtraCatchItemIds.Add(item.type);
+                    AutoFish.Config.Write();
+                    args.Player.SendSuccessMessage("已成功将物品添加额外渔获表: [c/92C5EC:{0}]!", item.Name);
+                    return true;
+                case "gdelloot":
+                    if (!AutoFish.Config.ExtraCatchItemIds.Contains(item.type))
+                    {
+                        args.Player.SendErrorMessage("物品 {0} 不在额外渔获中!", item.Name);
+                        return true;
+                    }
+
+                    AutoFish.Config.ExtraCatchItemIds.Remove(item.type);
+                    AutoFish.Config.Write();
+                    args.Player.SendSuccessMessage("已成功从额外渔获移出物品: [c/92C5EC:{0}]!", item.Name);
+                    return true;
+                case "gset":
+                    if (int.TryParse(args.Parameters[1], out var consumeNum))
+                    {
+                        AutoFish.Config.BaitConsumeCount = consumeNum;
+                        AutoFish.Config.Write();
+                        args.Player.SendSuccessMessage("已成功将物品数量要求设置为: [c/92C5EC:{0}] 个!", consumeNum);
+                    }
+
+                    return true;
+                case "gduo":
+                    if (int.TryParse(args.Parameters[1], out var maxNum))
+                    {
+                        AutoFish.Config.MultiHookMaxNum = maxNum;
+                        AutoFish.Config.Write();
+                        args.Player.SendSuccessMessage("已成功将多钩数量上限设置为: [c/92C5EC:{0}] 个!", maxNum);
+                    }
+
+                    return true;
+                case "gtime":
+                    if (int.TryParse(args.Parameters[1], out var rewardMinutes))
+                    {
+                        AutoFish.Config.RewardDurationMinutes = rewardMinutes;
+                        AutoFish.Config.Write();
+                        args.Player.SendSuccessMessage("已成功将自动时长设置为: [c/92C5EC:{0}] 分钟!", rewardMinutes);
+                    }
+
+                    return true;
+                default:
+                    HelpCmd(args.Player);
+                    return true;
+            }
+        }
+
+        return false;
     }
 }
