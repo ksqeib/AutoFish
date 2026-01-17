@@ -60,24 +60,24 @@ v1.0.0
 
 ## 指令
 
-| 语法                             | 别名  |       权限       |                   说明                   |
-| -------------------------------- | :---: | :--------------: | :--------------------------------------: |
-| /af  | /autofish |   autofish    |    指令菜单（查询自动钓鱼所剩时长）    |
-| /af on  | 无 |   autofish    |    开启玩家自己的自动钓鱼    |
-| /af off  | 无 |   autofish    |    关闭玩家自己的自动钓鱼    |
-| /af list  | 无 |   autofish    |    列出消耗模式指定物品表    |
-| /af loot  | 无 |   autofish    |    列出额外渔获表   |
-| /af buff  | 无 |   autofish    |    开启或关闭玩家自己的钓鱼BUFF    |
-| /af more  | 无 |   autofish.admin    |    开启或关闭多线模式   |
-| /af duo 数量  | 无 |   autofish.admin    |    设置多线的钩子数量   |
-| /af + 物品名  | 无 |   autofish.admin    |    为额外渔获添加物品   |
-| /af - 物品名  | 无 |   autofish.admin    |    为额外渔获移除物品   |
-| /af mod  | 无 |   autofish.admin    |    开启或关闭消耗模式   |
-| /af set 数量 | 无 |   autofish.admin    |    设置消耗物品数量要求    |
-| /af time 数字  | 无 |   autofish.admin    |    设置消耗自动时长    |
-| /af add 物品名  | 无 |   autofish.admin    |    添加消耗指定物品    |
-| /af del 物品名  | 无 |   autofish.admin    |    移除消耗指定物品    |
-| /reload  | 无 |   tshock.cfg.reload    |    重载配置文件    |
+| 语法          |    别名     |        权限         |        说明        |
+|-------------|:---------:|:-----------------:|:----------------:|
+| /af         | /autofish |     autofish      | 指令菜单（查询自动钓鱼所剩时长） |
+| /af on      |     无     |     autofish      |   开启玩家自己的自动钓鱼    |
+| /af off     |     无     |     autofish      |   关闭玩家自己的自动钓鱼    |
+| /af list    |     无     |     autofish      |   列出消耗模式指定物品表    |
+| /af loot    |     无     |     autofish      |     列出额外渔获表      |
+| /af buff    |     无     |     autofish      | 开启或关闭玩家自己的钓鱼BUFF |
+| /af more    |     无     |  autofish.admin   |    开启或关闭多线模式     |
+| /af duo 数量  |     无     |  autofish.admin   |    设置多线的钩子数量     |
+| /af + 物品名   |     无     |  autofish.admin   |    为额外渔获添加物品     |
+| /af - 物品名   |     无     |  autofish.admin   |    为额外渔获移除物品     |
+| /af mod     |     无     |  autofish.admin   |    开启或关闭消耗模式     |
+| /af set 数量  |     无     |  autofish.admin   |    设置消耗物品数量要求    |
+| /af time 数字 |     无     |  autofish.admin   |     设置消耗自动时长     |
+| /af add 物品名 |     无     |  autofish.admin   |     添加消耗指定物品     |
+| /af del 物品名 |     无     |  autofish.admin   |     移除消耗指定物品     |
+| /reload     |     无     | tshock.cfg.reload |      重载配置文件      |
 
 ---
 配置注意事项
@@ -87,7 +87,7 @@ v1.0.0
 2.`消耗模式`为1.1.0版本特性:消耗物品来换取自动钓鱼使用时长的逻辑，人多环境下可能存在性能问题。
 
 3.`多钩钓鱼`为自动钓鱼开启连发模式，让钓鱼效率更高，`多钩上限`定义最多可以多少鱼钩同时自动钓
-  
+
 4.`消耗数量`为消耗多少个物品数量来换取玩家自动钓鱼使用`自动时长`，时长单位为`分钟`，可通过/af菜单指令查看
 
 5.`消耗物品`为指定消耗的物品ID，用于开启自动钓鱼功能用。
@@ -99,7 +99,9 @@ v1.0.0
 8.`禁止衍生弹幕`用来禁止在多线钓鱼模式时，单体召唤物会衍生出更多数量。
 
 ## 配置
+
 > 配置文件位置：tshock/自动钓鱼.json
+
 ```json
 {
   "插件开关": true,
@@ -143,7 +145,9 @@ v1.0.0
   ]
 }
 ```
+
 ## 反馈
+
 - 优先发issued -> 共同维护的插件库：https://github.com/UnrealMultiple/TShockPlugin
 - 次优先：TShock官方群：816771079
 - 大概率看不到但是也可以：国内社区trhub.cn ，bbstr.net , tr.monika.love

@@ -6,6 +6,6 @@
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     </PropertyGroup>
     <ItemGroup>
-      <PackageReference Include="TShock" Version="5.*" />
+        <PackageReference Include="TShock" Version="5.*"/>
     </ItemGroup>
 </Project>

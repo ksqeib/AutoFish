@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace AutoFish.Utils;
+﻿namespace AutoFish.Utils;
 
 public class MyData
 {
@@ -12,17 +9,28 @@ public class MyData
 
     public class ItemData
     {
+        public ItemData(string name = "", bool enabled = true, bool mod = true, bool buff = true, int hookMax = 3,
+            bool moreHook = true)
+        {
+            Name = name ?? "";
+            Enabled = enabled;
+            Mod = mod;
+            Buff = buff;
+            HookMax = hookMax;
+            MoreHook = moreHook;
+        }
+
         //玩家名字
         public string Name { get; set; }
 
         //玩家开关
-        public bool Enabled { get; set; } = false;
+        public bool Enabled { get; set; }
 
         //消耗模式开关
-        public bool Mod { get; set; } = false;
+        public bool Mod { get; set; }
 
         //BUFF开关
-        public bool Buff { get; set; } = false;
+        public bool Buff { get; set; }
 
         //鱼线数量
         public int HookMax { get; set; } = 3;
@@ -33,17 +41,6 @@ public class MyData
 
         //记录时间
         public DateTime LogTime { get; set; }
-
-        public ItemData(string name = "", bool enabled = true, bool mod = true, bool buff = true, int hookMax = 3,
-            bool moreHook = true)
-        {
-            Name = name ?? "";
-            Enabled = enabled;
-            Mod = mod;
-            Buff = buff;
-            this.HookMax = hookMax;
-            this.MoreHook = moreHook;
-        }
     }
 
     #endregion
