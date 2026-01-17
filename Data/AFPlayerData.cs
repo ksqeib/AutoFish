@@ -2,7 +2,7 @@
 
 namespace AutoFish.Data;
 
-public class PlayerData
+public class AFPlayerData
 {
     //玩家数据表（使用字典以便按玩家名快速检索）
     private Dictionary<string, ItemData> Items { get; set; } = new(StringComparer.OrdinalIgnoreCase);
