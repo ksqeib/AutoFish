@@ -1,11 +1,15 @@
-﻿namespace AutoFish.Utils;
+﻿using System;
+using System.Collections.Generic;
+
+namespace AutoFish.Utils;
 
 public class MyData
 {
-    //玩家数据表
-    public List<ItemData> Items { get; set; } = new List<ItemData>();
+    //玩家数据表（使用字典以便按玩家名快速检索）
+    public Dictionary<string, ItemData> Items { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
     #region 数据结构
+
     public class ItemData
     {
         //玩家名字
@@ -20,16 +24,27 @@ public class MyData
         //BUFF开关
         public bool Buff { get; set; } = false;
 
+        //鱼线数量
+        public int HookMax { get; set; } = 3;
+
+
+        //鱼线数量
+        public bool MoreHook { get; set; } = true;
+
         //记录时间
         public DateTime LogTime { get; set; }
 
-        public ItemData(string name = "", bool enabled = true, bool mod = true, bool buff = true)
+        public ItemData(string name = "", bool enabled = true, bool mod = true, bool buff = true, int hookMax = 3,
+            bool moreHook = true)
         {
             Name = name ?? "";
             Enabled = enabled;
             Mod = mod;
             Buff = buff;
+            this.HookMax = hookMax;
+            this.MoreHook = moreHook;
         }
     }
+
     #endregion
 }
