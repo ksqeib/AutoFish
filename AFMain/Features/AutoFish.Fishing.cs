@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using AutoFish.Utils;
 using Terraria;
@@ -18,7 +19,7 @@ public partial class AutoFish
         if (args.Projectile.owner > Main.maxPlayers) return;
         if (!args.Projectile.active) return;
         if (!args.Projectile.bobber) return;
-        if (!Config.Enabled) return;
+        if (!Config.PluginEnabled) return;
 
         var player = TShock.Players[args.Projectile.owner];
         if (player == null) return;
@@ -29,7 +30,7 @@ public partial class AutoFish
         if (!playerData.AutoFishEnabled) return;
 
         // 正常状态下与消耗模式下启用自动钓鱼
-        if (Config.ConMod && !playerData.ConsumptionEnabled) return;
+        if (Config.ConsumptionModeEnabled && !playerData.ConsumptionEnabled) return;
 
         //检测是不是生成，是生成boss就不钓起来
         if (!(args.Projectile.ai[1] < 0)) return;
@@ -99,15 +100,15 @@ public partial class AutoFish
             // localAI[1]- 钓上来的东西
             // AI[1]- 鱼力
 
-            if (Config.Random) args.Projectile.localAI[1] = Random.Shared.Next(1, ItemID.Count);
+            if (Config.RandomLootEnabled) args.Projectile.localAI[1] = Random.Shared.Next(1, ItemID.Count);
 
             //ai[1] = localAI[1]
             args.Projectile.ai[1] = args.Projectile.localAI[1];
 
             // 如果额外渔获有任何1个物品ID，则参与AI[1]
-            if (Config.DoorItems.Any())
+            if (Config.ExtraCatchItemIds.Any())
                 if (args.Projectile.ai[1] <= 0) //额外渔获这里。。负数应该是boss
-                    args.Projectile.ai[1] = Config.DoorItems[Main.rand.Next(Config.DoorItems.Count)];
+                    args.Projectile.ai[1] = Config.ExtraCatchItemIds[Main.rand.Next(Config.ExtraCatchItemIds.Count)];
 
             hasCatch = args.Projectile.ai[1] > 0;
         }

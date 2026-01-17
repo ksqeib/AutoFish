@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Linq;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -194,7 +195,7 @@ public class SpawnProjectile
         if (timeLeft > 0) projectile.timeLeft = timeLeft;
 
         //排除单体召唤物：星尘守卫、星尘龙、沙漠虎、阿比盖尔的弹幕
-        if (AFMain.AutoFish.Config.DisableProjectile.Contains(Type))
+        if (AFMain.AutoFish.Config.DisabledProjectileIds.Contains(Type))
         {
             timeLeft = 0;
             projectile.frame = 0;

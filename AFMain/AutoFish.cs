@@ -54,7 +54,7 @@ public partial class AutoFish : TerrariaPlugin
             AutoFishEnabled = true,
             BuffEnabled = canBuff,
             ConsumptionEnabled = false,
-            HookMaxNum = Config.HookMax,
+            HookMaxNum = Config.MultiHookMaxNum,
             MultiHookEnabled = canMulti
         };
     }

@@ -18,8 +18,8 @@ public partial class AutoFish
     private void OnPlayerUpdate(object? sender, GetDataHandlers.PlayerUpdateEventArgs args)
     {
         var player = args.Player;
-        if (!Config.Enabled) return;
-        if (!Config.ConMod) return;
+        if (!Config.PluginEnabled) return;
+        if (!Config.ConsumptionModeEnabled) return;
         if (args == null) return;
         if (player == null) return;
         if (!player.IsLoggedIn) return;
@@ -35,11 +35,11 @@ public partial class AutoFish
         if (!playerData.ConsumptionEnabled)
         {
             //初始化一个消耗值
-            var requiredBait = Config.BaitStack;
+            var requiredBait = Config.BaitConsumeCount;
 
             // 统计背包中指定鱼饵的总数量(不包含手上物品)
             var totalBait = player.TPlayer.inventory.Sum(slot =>
-                Config.BaitType.Contains(slot.type) &&
+                Config.BaitItemIds.Contains(slot.type) &&
                 slot.type != player.TPlayer.inventory[player.TPlayer.selectedItem].type
                     ? slot.stack
                     : 0);
@@ -53,7 +53,7 @@ public partial class AutoFish
                     var inventorySlot = player.TPlayer.inventory[i];
 
                     // 是Config里指定的鱼饵,不是手上的物品
-                    if (Config.BaitType.Contains(inventorySlot.type))
+                    if (Config.BaitItemIds.Contains(inventorySlot.type))
                     {
                         var consumedCount = Math.Min(requiredBait, inventorySlot.stack); // 计算需要消耗的鱼饵数量
 
@@ -96,13 +96,13 @@ public partial class AutoFish
     {
         var expiredMessage = new StringBuilder();
         expiredMessage.AppendLine("[i:3455][c/AD89D5:自][c/D68ACA:动][c/DF909A:钓][c/E5A894:鱼][i:3454]");
-        expiredMessage.AppendLine($"以下玩家超过 [c/E17D8C:{Config.timer}] 分钟 已关闭[c/76D5B4:自动钓鱼]权限：");
+        expiredMessage.AppendLine($"以下玩家超过 [c/E17D8C:{Config.RewardDurationMinutes}] 分钟 已关闭[c/76D5B4:自动钓鱼]权限：");
 
         // 只显示分钟
         var minutesElapsed = (DateTime.Now - playerData.LogTime).TotalMinutes;
 
         // 时间过期 关闭自动钓鱼权限
-        if (minutesElapsed >= Config.timer)
+        if (minutesElapsed >= Config.RewardDurationMinutes)
         {
             ClearCount++;
             playerData.ConsumptionEnabled = false;

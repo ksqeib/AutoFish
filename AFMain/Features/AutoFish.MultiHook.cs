@@ -20,16 +20,16 @@ public partial class AutoFish
         if (player == null) return;
         if (!player.Active) return;
         if (!player.IsLoggedIn) return;
-        if (!Config.Enabled) return;
-        if (!Config.MoreHook) return;
-        if (hookCount > Config.HookMax - 1) return;
+        if (!Config.PluginEnabled) return;
+        if (!Config.MultiHookEnabled) return;
+        if (hookCount > Config.MultiHookMaxNum - 1) return;
 
         // 从数据表中获取与玩家名字匹配的配置项
         var playerData = PlayerData.GetOrCreatePlayerData(player.Name, CreateDefaultPlayerData);
         if (!playerData.AutoFishEnabled) return;
 
         // 正常状态下与消耗模式下启用多线钓鱼
-        if (Config.ConMod && (!Config.ConMod || !playerData.ConsumptionEnabled)) return;
+        if (Config.ConsumptionModeEnabled && !playerData.ConsumptionEnabled) return;
         // 检查是否上钩
         if (!Tools.BobbersActive(args.Owner)) return;
         

@@ -33,9 +33,9 @@ public class Commands
                                   "/af off -- 自动钓鱼[c/F25055:关闭]功能\n" +
                                   "/af buff -- 开启丨关闭[c/F6B152:钓鱼BUFF]");
 
-                if (AutoFish.Config.DoorItems.Any()) helpMessage.AppendFormat("\n/af loot -- 查看[c/F25055:额外渔获表]");
+                if (AutoFish.Config.ExtraCatchItemIds.Any()) helpMessage.AppendFormat("\n/af loot -- 查看[c/F25055:额外渔获表]");
 
-                if (AutoFish.Config.ConMod) helpMessage.AppendFormat("\n/af list -- 列出消耗模式[c/F5F251:指定物品表]");
+                if (AutoFish.Config.ConsumptionModeEnabled) helpMessage.AppendFormat("\n/af list -- 列出消耗模式[c/F5F251:指定物品表]");
 
                 player.SendMessage(helpMessage.ToString(), 193, 223, 186);
             }
@@ -53,7 +53,7 @@ public class Commands
                                   "/af duo 数字 -- 设置多线的[c/4686D4:钩子数量]\n" +
                                   "/af mod -- 开启丨关闭[c/50D647:消耗模式]");
 
-                if (AutoFish.Config.ConMod)
+                if (AutoFish.Config.ConsumptionModeEnabled)
                     helpMessage.AppendFormat("\n/af list -- 列出消耗[c/F5F251:指定物品表]\n" +
                                       "/af set 数量 -- 设置消耗[c/47C2D5:物品数量]要求\n" +
                                       "/af time 数字 -- 设置消耗[c/F6B152:自动时长]\n" +
@@ -74,12 +74,12 @@ public class Commands
     {
         var player = args.Player;
 
-        if (!AutoFish.Config.Enabled) return;
+        if (!AutoFish.Config.PluginEnabled) return;
 
         var playerData = AutoFish.PlayerData.GetOrCreatePlayerData(player.Name, AutoFish.CreateDefaultPlayerData);
 
         //消耗模式下的剩余时间记录
-        var remainingMinutes = AutoFish.Config.timer - (DateTime.Now - playerData.LogTime).TotalMinutes;
+        var remainingMinutes = AutoFish.Config.RewardDurationMinutes - (DateTime.Now - playerData.LogTime).TotalMinutes;
 
         if (args.Parameters.Count == 0)
         {
@@ -89,7 +89,7 @@ public class Commands
                 args.Player.SendSuccessMessage("请输入该指令开启→: [c/92C5EC:/af on]");
 
             //开启了消耗模式
-            else if (AutoFish.Config.ConMod)
+            else if (AutoFish.Config.ConsumptionModeEnabled)
                 args.Player.SendMessage($"自动钓鱼[c/46C4D4:剩余时长]：[c/F3F292:{Math.Floor(remainingMinutes)}]分钟", 243, 181, 145);
 
             //检测到血月
@@ -131,20 +131,20 @@ public class Commands
                 return;
             }
 
-            if (args.Parameters[0].ToLower() == "list" && AutoFish.Config.ConMod)
+            if (args.Parameters[0].ToLower() == "list" && AutoFish.Config.ConsumptionModeEnabled)
             {
                 args.Player.SendInfoMessage("[指定消耗物品表]\n" + string.Join(", ",
-                    AutoFish.Config.BaitType.Select(x =>
+                    AutoFish.Config.BaitItemIds.Select(x =>
                         TShock.Utils.GetItemById(x).Name + "([c/92C5EC:{0}])".SFormat(x))));
                 args.Player.SendSuccessMessage(
-                    $"兑换规则为：每[c/F5F252:{AutoFish.Config.BaitStack}]个 => [c/92C5EC:{AutoFish.Config.timer}]分钟");
+                    $"兑换规则为：每[c/F5F252:{AutoFish.Config.BaitConsumeCount}]个 => [c/92C5EC:{AutoFish.Config.RewardDurationMinutes}]分钟");
                 return;
             }
 
-            if (args.Parameters[0].ToLower() == "loot" && AutoFish.Config.DoorItems.Any())
+            if (args.Parameters[0].ToLower() == "loot" && AutoFish.Config.ExtraCatchItemIds.Any())
             {
                 args.Player.SendInfoMessage("[额外渔获表]\n" + string.Join(", ",
-                    AutoFish.Config.DoorItems.Select(x =>
+                    AutoFish.Config.ExtraCatchItemIds.Select(x =>
                         TShock.Utils.GetItemById(x).Name + "([c/92C5EC:{0}])".SFormat(x))));
                 return;
             }
@@ -154,8 +154,8 @@ public class Commands
             {
                 if (args.Parameters[0].ToLower() == "more")
                 {
-                    var isEnabled = AutoFish.Config.MoreHook;
-                    AutoFish.Config.MoreHook = !isEnabled;
+                    var isEnabled = AutoFish.Config.MultiHookEnabled;
+                    AutoFish.Config.MultiHookEnabled = !isEnabled;
                     var toggleText = isEnabled ? "禁用" : "启用";
                     args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{toggleText}]多线模式");
                     AutoFish.Config.Write();
@@ -164,8 +164,8 @@ public class Commands
 
                 if (args.Parameters[0].ToLower() == "buffcfg")
                 {
-                    var isEnabled = AutoFish.Config.BuffEnabled;
-                    AutoFish.Config.BuffEnabled = !isEnabled;
+                    var isEnabled = AutoFish.Config.GlobalBuffEnabled;
+                    AutoFish.Config.GlobalBuffEnabled = !isEnabled;
                     var toggleText = isEnabled ? "禁用" : "启用";
                     args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{toggleText}]全局钓鱼BUFF");
                     AutoFish.Config.Write();
@@ -174,8 +174,8 @@ public class Commands
 
                 if (args.Parameters[0].ToLower() == "mod")
                 {
-                    var isEnabled = AutoFish.Config.ConMod;
-                    AutoFish.Config.ConMod = !isEnabled;
+                    var isEnabled = AutoFish.Config.ConsumptionModeEnabled;
+                    AutoFish.Config.ConsumptionModeEnabled = !isEnabled;
                     var toggleText = isEnabled ? "禁用" : "启用";
                     args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{toggleText}]消耗模式");
                     AutoFish.Config.Write();
@@ -209,13 +209,13 @@ public class Commands
                 {
                     case "add":
                     {
-                        if (AutoFish.Config.BaitType.Contains(item.type))
+                        if (AutoFish.Config.BaitItemIds.Contains(item.type))
                         {
                             args.Player.SendErrorMessage("物品 [c/92C5EC:{0}] 已在指定鱼饵表中!", item.Name);
                             return;
                         }
 
-                        AutoFish.Config.BaitType.Add(item.type);
+                        AutoFish.Config.BaitItemIds.Add(item.type);
                         AutoFish.Config.Write();
                         args.Player.SendSuccessMessage("已成功将物品添加指定鱼饵表: [c/92C5EC:{0}]!", item.Name);
                         break;
@@ -223,13 +223,13 @@ public class Commands
 
                     case "del":
                     {
-                        if (!AutoFish.Config.BaitType.Contains(item.type))
+                        if (!AutoFish.Config.BaitItemIds.Contains(item.type))
                         {
                             args.Player.SendErrorMessage("物品 {0} 不在指定鱼饵表中!", item.Name);
                             return;
                         }
 
-                        AutoFish.Config.BaitType.Remove(item.type);
+                        AutoFish.Config.BaitItemIds.Remove(item.type);
                         AutoFish.Config.Write();
                         args.Player.SendSuccessMessage("已成功从指定鱼饵表移出物品: [c/92C5EC:{0}]!", item.Name);
                         break;
@@ -237,13 +237,13 @@ public class Commands
 
                     case "+":
                     {
-                        if (AutoFish.Config.DoorItems.Contains(item.type))
+                        if (AutoFish.Config.ExtraCatchItemIds.Contains(item.type))
                         {
                             args.Player.SendErrorMessage("物品 [c/92C5EC:{0}] 已在额外渔获表中!", item.Name);
                             return;
                         }
 
-                        AutoFish.Config.DoorItems.Add(item.type);
+                        AutoFish.Config.ExtraCatchItemIds.Add(item.type);
                         AutoFish.Config.Write();
                         args.Player.SendSuccessMessage("已成功将物品添加额外渔获表: [c/92C5EC:{0}]!", item.Name);
                         break;
@@ -251,13 +251,13 @@ public class Commands
 
                     case "-":
                     {
-                        if (!AutoFish.Config.DoorItems.Contains(item.type))
+                        if (!AutoFish.Config.ExtraCatchItemIds.Contains(item.type))
                         {
                             args.Player.SendErrorMessage("物品 {0} 不在额外渔获中!", item.Name);
                             return;
                         }
 
-                        AutoFish.Config.DoorItems.Remove(item.type);
+                        AutoFish.Config.ExtraCatchItemIds.Remove(item.type);
                         AutoFish.Config.Write();
                         args.Player.SendSuccessMessage("已成功从额外渔获移出物品: [c/92C5EC:{0}]!", item.Name);
                         break;
@@ -267,7 +267,7 @@ public class Commands
                     {
                         if (int.TryParse(args.Parameters[1], out var num))
                         {
-                            AutoFish.Config.BaitStack = num;
+                            AutoFish.Config.BaitConsumeCount = num;
                             AutoFish.Config.Write();
                             args.Player.SendSuccessMessage("已成功将物品数量要求设置为: [c/92C5EC:{0}] 个!", num);
                         }
@@ -279,7 +279,7 @@ public class Commands
                     {
                         if (int.TryParse(args.Parameters[1], out var num))
                         {
-                            AutoFish.Config.HookMax = num;
+                            AutoFish.Config.MultiHookMaxNum = num;
                             AutoFish.Config.Write();
                             args.Player.SendSuccessMessage("已成功将多钩数量上限设置为: [c/92C5EC:{0}] 个!", num);
                         }
@@ -291,7 +291,7 @@ public class Commands
                     {
                         if (int.TryParse(args.Parameters[1], out var num))
                         {
-                            AutoFish.Config.timer = num;
+                            AutoFish.Config.RewardDurationMinutes = num;
                             AutoFish.Config.Write();
                             args.Player.SendSuccessMessage("已成功将自动时长设置为: [c/92C5EC:{0}] 分钟!", num);
                         }

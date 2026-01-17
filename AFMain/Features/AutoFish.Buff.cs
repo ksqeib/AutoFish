@@ -15,8 +15,8 @@ public partial class AutoFish
         if (player == null) return;
         if (!player.Active) return;
         if (!player.IsLoggedIn) return;
-        if (!Config.Enabled) return;
-        if (!Config.BuffEnabled) return;
+        if (!Config.PluginEnabled) return;
+        if (!Config.GlobalBuffEnabled) return;
 
         // 从数据表中获取与玩家名字匹配的配置项
         var playerData = PlayerData.GetOrCreatePlayerData(player.Name, CreateDefaultPlayerData);
@@ -26,7 +26,7 @@ public partial class AutoFish
         if (!playerData.AutoFishEnabled) return;
         if (!Tools.BobbersActive(args.Owner)) return;
 
-        foreach (var buff in Config.BuffID)
+        foreach (var buff in Config.BuffDurations)
             player.SetBuff(buff.Key, buff.Value);
     }
 }
