@@ -45,8 +45,8 @@ namespace AutoFish
         {
             BuffID = new Dictionary<int, int>()
             {
-                { 80,10 },
-                { 122,240 }
+                // { 80,10 },
+                // { 122,240 }
             };
 
             BaitType = new List<int>
@@ -56,13 +56,13 @@ namespace AutoFish
 
             DoorItems = new List<int>
             {
-                29,3093,4345
+                // 29,3093,4345
             };
         }
         #endregion
 
         #region 读取与创建配置文件方法
-        public static readonly string FilePath = Path.Combine(TShock.SavePath, "自动钓鱼.json");
+        public static readonly string FilePath = Path.Combine(TShock.SavePath, "AutoFish.json");
 
         public void Write()
         {
