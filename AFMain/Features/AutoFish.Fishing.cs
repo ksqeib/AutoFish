@@ -1,4 +1,3 @@
-using System.Linq;
 using AutoFish.Utils;
 using Terraria;
 using Terraria.ID;
@@ -10,26 +9,26 @@ namespace AutoFish.AFMain;
 public partial class AutoFish
 {
     /// <summary>
-    /// 触发自动钓鱼，处理浮漂 AI 更新与收杆逻辑。原理：每次AI更新后尝试为玩家把鱼钓起来，并生成一个新的同样的弹射物
+    ///     触发自动钓鱼，处理浮漂 AI 更新与收杆逻辑。原理：每次AI更新后尝试为玩家把鱼钓起来，并生成一个新的同样的弹射物
     /// </summary>
     private void ProjectAiUpdate(ProjectileAiUpdateEventArgs args)
     {
-        if (args.Projectile.owner is < 0 or > Main.maxPlayers ||
-            !args.Projectile.active ||
-            !args.Projectile.bobber ||
-            !Config.Enabled)
-            return;
+        if (args.Projectile.owner < 0) return;
+        if (args.Projectile.owner > Main.maxPlayers) return;
+        if (!args.Projectile.active) return;
+        if (!args.Projectile.bobber) return;
+        if (!Config.Enabled) return;
 
         var plr = TShock.Players[args.Projectile.owner];
-        if (plr == null || !plr.Active)
-            return;
+        if (plr == null) return;
+        if (!plr.Active) return;
 
         // 从数据表中获取与玩家名字匹配的配置项
         var list = PlayerData.GetOrCreatePlayerData(plr.Name, CreateDefaultPlayerData);
         if (!list.Enabled) return;
 
         // 正常状态下与消耗模式下启用自动钓鱼
-        if (Config.ConMod && (!Config.ConMod || !list.Mod)) return;
+        if (Config.ConMod && !list.Mod) return;
 
         //检测是不是生成，是生成boss就不钓起来
         if (!(args.Projectile.ai[1] < 0)) return;
@@ -65,7 +64,7 @@ public partial class AutoFish
 
                 //当前物品数量为1则移除（避免选中的饵不会主动消失 变成无限饵 或 卡住线程）
                 if (inv.stack > 1 && inv.bait > 1) continue;
-                
+
                 inv.TurnToAir();
                 plr.SendData(PacketTypes.PlayerSlot, "", plr.Index, i);
                 break;
@@ -90,7 +89,7 @@ public partial class AutoFish
             //61就是直接调用AI_061_FishingBobber
             //原版方法，获取物品啥的
             args.Projectile.FishingCheck();
-            
+
             // FishingCheck_RollDropLevels - 会得出玩家得到的物品稀有度
             // FishingCheck_ProbeForQuestFish - 任务🐟概率
             // FishingCheck_RollEnemySpawns - 生成敌怪 -> fisher.rolledEnemySpawn -> -localAI[1]
@@ -112,7 +111,7 @@ public partial class AutoFish
             flag = args.Projectile.ai[1] > 0;
         }
 
-        if (!flag) return;//小于0不加新的
+        if (!flag) return; //小于0不加新的
         // 原版给东西的代码，在kill函数，会把ai[1]给玩家
         // if (Main.myPlayer == this.owner && this.bobber)
         // {

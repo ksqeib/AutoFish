@@ -1,8 +1,6 @@
-using System;
-using System.Linq;
 using System.Text;
+using AutoFish.Data;
 using Terraria.ID;
-using TerrariaApi.Server;
 using TShockAPI;
 
 namespace AutoFish.AFMain;
@@ -13,14 +11,17 @@ public partial class AutoFish
     private static int ClearCount; //需要关闭钓鱼权限的玩家计数
 
     /// <summary>
-    /// 消耗模式下根据玩家物品开启或关闭自动钓鱼。
+    ///     消耗模式下根据玩家物品开启或关闭自动钓鱼。
     /// </summary>
     private void OnPlayerUpdate(object? sender, GetDataHandlers.PlayerUpdateEventArgs e)
     {
         var plr = e.Player;
-        if (!Config.Enabled || !Config.ConMod || e == null ||
-            plr == null || !plr.IsLoggedIn || !plr.Active)
-            return;
+        if (!Config.Enabled) return;
+        if (!Config.ConMod) return;
+        if (e == null) return;
+        if (plr == null) return;
+        if (!plr.IsLoggedIn) return;
+        if (!plr.Active) return;
 
         var data = PlayerData.GetOrCreatePlayerData(plr.Name, CreateDefaultPlayerData);
         if (!data.Enabled) return;
@@ -87,9 +88,9 @@ public partial class AutoFish
     }
 
     /// <summary>
-    /// 消耗模式下检测超时并关闭自动钓鱼权限。
+    ///     消耗模式下检测超时并关闭自动钓鱼权限。
     /// </summary>
-    private static void ExitMod(TSPlayer plr, Data.AFPlayerData.ItemData data)
+    private static void ExitMod(TSPlayer plr, AFPlayerData.ItemData data)
     {
         var mess2 = new StringBuilder();
         mess2.AppendLine("[i:3455][c/AD89D5:自][c/D68ACA:动][c/DF909A:钓][c/E5A894:鱼][i:3454]");

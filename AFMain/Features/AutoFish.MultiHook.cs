@@ -1,8 +1,5 @@
-using System;
-using System.Linq;
 using AutoFish.Utils;
 using Terraria;
-using TerrariaApi.Server;
 using TShockAPI;
 
 namespace AutoFish.AFMain;
@@ -10,7 +7,7 @@ namespace AutoFish.AFMain;
 public partial class AutoFish
 {
     /// <summary>
-    /// 处理多线钓鱼，派生额外的鱼线弹幕。
+    ///     处理多线钓鱼，派生额外的鱼线弹幕。
     /// </summary>
     public void ProjectNew(object sender, GetDataHandlers.NewProjectileEventArgs e)
     {
@@ -18,13 +15,12 @@ public partial class AutoFish
         var guid = Guid.NewGuid().ToString();
         var HookCount = Main.projectile.Count(p => p.active && p.owner == e.Owner && p.bobber); // 浮漂计数
 
-        if (plr == null ||
-            !plr.Active ||
-            !plr.IsLoggedIn ||
-            !Config.Enabled ||
-            !Config.MoreHook ||
-            HookCount > Config.HookMax - 1)
-            return;
+        if (plr == null) return;
+        if (!plr.Active) return;
+        if (!plr.IsLoggedIn) return;
+        if (!Config.Enabled) return;
+        if (!Config.MoreHook) return;
+        if (HookCount > Config.HookMax - 1) return;
 
         // 从数据表中获取与玩家名字匹配的配置项
         var list = PlayerData.GetOrCreatePlayerData(plr.Name, CreateDefaultPlayerData);
@@ -33,7 +29,7 @@ public partial class AutoFish
         // 正常状态下与消耗模式下启用多线钓鱼
         if (!Config.ConMod || (Config.ConMod && list.Mod))
             // 检查是否上钩
-            if (Utils.Tools.BobbersActive(e.Owner))
+            if (Tools.BobbersActive(e.Owner))
             {
                 var index = SpawnProjectile.NewProjectile(Main.projectile[e.Index].GetProjectileSource_FromThis(),
                     e.Position, e.Velocity, e.Type, e.Damage, e.Knockback, e.Owner, 0, 0, 0, -1, guid);

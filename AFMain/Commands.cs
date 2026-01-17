@@ -5,12 +5,12 @@ using TShockAPI;
 namespace AutoFish.AFMain;
 
 /// <summary>
-/// 自动钓鱼插件的聊天命令处理。
+///     自动钓鱼插件的聊天命令处理。
 /// </summary>
 public class Commands
 {
     /// <summary>
-    /// 向玩家展示自动钓鱼指令帮助。
+    ///     向玩家展示自动钓鱼指令帮助。
     /// </summary>
     private static void HelpCmd(TSPlayer plr)
     {
@@ -66,7 +66,7 @@ public class Commands
     }
 
     /// <summary>
-    /// 处理 /af 相关指令的入口。
+    ///     处理 /af 相关指令的入口。
     /// </summary>
     public static void Afs(CommandArgs args)
     {

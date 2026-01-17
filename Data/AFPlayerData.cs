@@ -1,14 +1,12 @@
-﻿using System;
-
-namespace AutoFish.Data;
+﻿namespace AutoFish.Data;
 
 public class AFPlayerData
 {
     //玩家数据表（使用字典以便按玩家名快速检索）
-    private Dictionary<string, ItemData> Items { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    private Dictionary<string, ItemData> Items { get; } = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
-    /// 获取或创建玩家数据入口，内部使用私有工厂方法。
+    ///     获取或创建玩家数据入口，内部使用私有工厂方法。
     /// </summary>
     public ItemData GetOrCreatePlayerData(string name, Func<string, ItemData> factory)
     {
@@ -16,7 +14,7 @@ public class AFPlayerData
     }
 
     /// <summary>
-    /// 私有的获取或创建逻辑，隐藏底层字典实现。
+    ///     私有的获取或创建逻辑，隐藏底层字典实现。
     /// </summary>
     private ItemData GetOrCreate(string name, Func<string, ItemData> factory)
     {
@@ -33,7 +31,7 @@ public class AFPlayerData
     }
 
     /// <summary>
-    /// 玩家自动钓鱼相关配置。
+    ///     玩家自动钓鱼相关配置。
     /// </summary>
     public class ItemData
     {

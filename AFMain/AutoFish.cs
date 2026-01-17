@@ -1,16 +1,27 @@
-﻿using System;
-using System.Linq;
+﻿using AutoFish.Data;
 using Terraria;
 using TerrariaApi.Server;
 using TShockAPI;
 using TShockAPI.Hooks;
-using AutoFish.Data;
 
 namespace AutoFish.AFMain;
 
 [ApiVersion(2, 1)]
 public partial class AutoFish : TerrariaPlugin
 {
+    /// <summary>全局配置实例。</summary>
+    internal static Configuration Config = new();
+
+    /// <summary>玩家数据集合。</summary>
+    internal static AFPlayerData PlayerData = new();
+
+    /// <summary>
+    ///     创建插件实例。
+    /// </summary>
+    public AutoFish(Main game) : base(game)
+    {
+    }
+
     /// <summary>插件名称。</summary>
     public override string Name => "自动钓鱼";
 
@@ -24,26 +35,13 @@ public partial class AutoFish : TerrariaPlugin
     public override string Description => "青山常伴绿水，燕雀已是南飞";
 
     /// <summary>
-    /// 创建插件实例。
-    /// </summary>
-    public AutoFish(Main game) : base(game)
-    {
-    }
-
-    /// <summary>全局配置实例。</summary>
-    internal static Configuration Config = new();
-
-    /// <summary>玩家数据集合。</summary>
-    internal static AFPlayerData PlayerData = new();
-    
-    /// <summary>
-    /// 默认玩家数据工厂，基于当前配置初始化。
+    ///     默认玩家数据工厂，基于当前配置初始化。
     /// </summary>
     internal static AFPlayerData.ItemData CreateDefaultPlayerData(string playerName)
     {
         // Attempt to resolve current player to seed defaults from permissions
         var plr = TShock.Players.FirstOrDefault(p => p != null && p.Active &&
-                                                    p.Name.Equals(playerName, StringComparison.OrdinalIgnoreCase));
+                                                     p.Name.Equals(playerName, StringComparison.OrdinalIgnoreCase));
 
         var canBuff = plr != null && (plr.HasPermission("autofish.buff") || plr.HasPermission("autofish.admin"));
         var canMulti = plr != null && (plr.HasPermission("autofish.multihook") || plr.HasPermission("autofish.admin"));
@@ -58,8 +56,9 @@ public partial class AutoFish : TerrariaPlugin
             MoreHook = canMulti
         };
     }
+
     /// <summary>
-    /// 插件初始化，注册事件和命令。
+    ///     插件初始化，注册事件和命令。
     /// </summary>
     public override void Initialize()
     {
@@ -73,7 +72,7 @@ public partial class AutoFish : TerrariaPlugin
     }
 
     /// <summary>
-    /// 释放插件，注销事件与命令。
+    ///     释放插件，注销事件与命令。
     /// </summary>
     protected override void Dispose(bool disposing)
     {
@@ -91,7 +90,7 @@ public partial class AutoFish : TerrariaPlugin
     }
 
     /// <summary>
-    /// 处理 /reload 触发的配置重载。
+    ///     处理 /reload 触发的配置重载。
     /// </summary>
     private static void ReloadConfig(ReloadEventArgs args)
     {
@@ -100,7 +99,7 @@ public partial class AutoFish : TerrariaPlugin
     }
 
     /// <summary>
-    /// 读取并落盘配置。
+    ///     读取并落盘配置。
     /// </summary>
     private static void LoadConfig()
     {
