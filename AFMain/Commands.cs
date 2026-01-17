@@ -46,6 +46,7 @@ public class Commands
 
                 mess.AppendFormat("\n/af on 或 off -- 自动钓鱼[c/4686D4:开启]|[c/F25055:关闭]功能\n" +
                                   "/af buff -- 开启丨关闭[c/F6B152:钓鱼BUFF]\n" +
+                                  "/af buffcfg -- 开启丨关闭[c/F6B152:全局钓鱼BUFF]\n" +
                                   "/af more -- 开启丨关闭[c/DB48A7:多线模式]\n" +
                                   "/af duo 数字 -- 设置多线的[c/4686D4:钩子数量]\n" +
                                   "/af mod -- 开启丨关闭[c/50D647:消耗模式]");
@@ -149,6 +150,16 @@ public class Commands
                     AutoFish.Config.MoreHook = !isEnabled;
                     var Mess = isEnabled ? "禁用" : "启用";
                     args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{Mess}]多线模式");
+                    AutoFish.Config.Write();
+                    return;
+                }
+
+                if (args.Parameters[0].ToLower() == "buffcfg")
+                {
+                    var isEnabled = AutoFish.Config.BuffEnabled;
+                    AutoFish.Config.BuffEnabled = !isEnabled;
+                    var Mess = isEnabled ? "禁用" : "启用";
+                    args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{Mess}]全局钓鱼BUFF");
                     AutoFish.Config.Write();
                     return;
                 }

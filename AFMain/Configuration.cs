@@ -38,6 +38,8 @@ internal class Configuration
 
     [JsonProperty("多钩上限", Order = -10)] public int HookMax { get; set; } = 5;
 
+    [JsonProperty("Buff开关", Order = -9)] public bool BuffEnabled { get; set; } = false;
+
     [JsonProperty("Buff表", Order = -6)] public Dictionary<int, int> BuffID { get; set; } = new();
 
     [JsonProperty("消耗模式", Order = -5)] public bool ConMod { get; set; }
