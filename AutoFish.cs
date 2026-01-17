@@ -381,12 +381,6 @@ public class AutoFish : TerrariaPlugin
         // 确保有一个玩家计数，只播报一次
         if (ClearCount > 0 && mess2.Length > 0)
         {
-            //广告开关
-            if (Config.AdvertisementEnabled)
-            {
-                //自定义广告内容
-                mess2.AppendLine(Config.Advertisement);
-            }
             plr.SendMessage(mess2.ToString(), 247, 244, 150);
             ClearCount = 0;
         }

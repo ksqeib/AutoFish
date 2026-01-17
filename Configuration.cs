@@ -18,12 +18,6 @@ namespace AutoFish
         [JsonProperty("多钩上限", Order = -10)]
         public int HookMax { get; set; } = 5;
 
-        [JsonProperty("广告开关", Order = -9)]
-        public bool AdvertisementEnabled { get; set; } = true;
-
-        [JsonProperty("广告内容", Order = -8)]
-        public string Advertisement { get; set; } = $"\n[i:3456][C/F2F2C7:插件开发] [C/BFDFEA:by] [c/00FFFF:羽学] | [c/7CAEDD:少司命][i:3459]";
-
         [JsonProperty("Buff表", Order = -6)]
         public Dictionary<int, int> BuffID { get; set; } = new Dictionary<int, int>();
 

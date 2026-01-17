@@ -20,11 +20,7 @@ namespace AutoFish
                 {
                     var mess = new StringBuilder();
                     mess.AppendFormat($"          [i:3455][c/AD89D5:自][c/D68ACA:动][c/DF909A:钓][c/E5A894:鱼][i:3454]");
-
-                    if (AutoFish.Config.AdvertisementEnabled)
-                    {
-                        mess.AppendFormat(AutoFish.Config.Advertisement);
-                    }
+                    
 
                     mess.AppendFormat("\n/af -- 查看自动钓鱼菜单\n" +
                      "/af on -- 自动钓鱼[c/4686D4:开启]功能\n" +
@@ -49,12 +45,7 @@ namespace AutoFish
                 {
                     var mess = new StringBuilder();
                     mess.AppendFormat($"          [i:3455][c/AD89D5:自][c/D68ACA:动][c/DF909A:钓][c/E5A894:鱼][i:3454]");
-
-                    if (AutoFish.Config.AdvertisementEnabled)
-                    {
-                        mess.AppendFormat(AutoFish.Config.Advertisement);
-                    }
-
+                    
                     mess.AppendFormat("\n/af on 或 off -- 自动钓鱼[c/4686D4:开启]|[c/F25055:关闭]功能\n" +
                      "/af buff -- 开启丨关闭[c/F6B152:钓鱼BUFF]\n" +
                      "/af more -- 开启丨关闭[c/DB48A7:多线模式]\n" +
