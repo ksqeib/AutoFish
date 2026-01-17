@@ -12,8 +12,9 @@ namespace AutoFish.AFMain;
 [ApiVersion(2, 1)]
 public class AutoFish : TerrariaPlugin
 {
-    #region 触发自动钓鱼方法
-
+    /// <summary>
+    /// 触发自动钓鱼，处理浮漂 AI 更新与收杆逻辑。
+    /// </summary>
     private void ProjectAiUpdate(ProjectileAiUpdateEventArgs args)
     {
         if (args.Projectile.owner is < 0 or > Main.maxPlayers ||
@@ -111,10 +112,9 @@ public class AutoFish : TerrariaPlugin
             }
     }
 
-    #endregion
-
-    #region 多线钓鱼
-
+    /// <summary>
+    /// 处理多线钓鱼，派生额外的鱼线弹幕。
+    /// </summary>
     public void ProjectNew(object sender, GetDataHandlers.NewProjectileEventArgs e)
     {
         var plr = e.Player;
@@ -147,10 +147,9 @@ public class AutoFish : TerrariaPlugin
             }
     }
 
-    #endregion
-
-    #region Buff更新方法
-
+    /// <summary>
+    /// 为满足条件的玩家在钓鱼时施加 Buff。
+    /// </summary>
     public void BuffUpdate(object sender, GetDataHandlers.NewProjectileEventArgs e)
     {
         var plr = e.Player;
@@ -167,10 +166,9 @@ public class AutoFish : TerrariaPlugin
                     plr.SetBuff(buff.Key, buff.Value);
     }
 
-    #endregion
-
-    #region 消耗模式:消耗物品开启自动钓鱼方法
-
+    /// <summary>
+    /// 消耗模式下根据玩家物品开启或关闭自动钓鱼。
+    /// </summary>
     private void OnPlayerUpdate(object? sender, GetDataHandlers.PlayerUpdateEventArgs e)
     {
         var plr = e.Player;
@@ -242,23 +240,28 @@ public class AutoFish : TerrariaPlugin
         }
     }
 
-    #endregion
-
-    #region 插件信息
-
+    /// <summary>插件名称。</summary>
     public override string Name => "自动钓鱼";
+
+    /// <summary>插件作者。</summary>
     public override string Author => "羽学 少司命 ksqeib";
+
+    /// <summary>插件版本。</summary>
     public override Version Version => new(1, 3, 3);
+
+    /// <summary>插件描述。</summary>
     public override string Description => "涡轮增压不蒸鸭";
 
-    #endregion
-
-    #region 注册与释放
-
+    /// <summary>
+    /// 创建插件实例。
+    /// </summary>
     public AutoFish(Main game) : base(game)
     {
     }
 
+    /// <summary>
+    /// 插件初始化，注册事件和命令。
+    /// </summary>
     public override void Initialize()
     {
         LoadConfig();
@@ -271,6 +274,9 @@ public class AutoFish : TerrariaPlugin
         TShockAPI.Commands.ChatCommands.Add(new Command("autofish", Commands.Afs, "af", "autofish"));
     }
 
+    /// <summary>
+    /// 释放插件，注销事件与命令。
+    /// </summary>
     protected override void Dispose(bool disposing)
     {
         if (disposing)
@@ -287,30 +293,33 @@ public class AutoFish : TerrariaPlugin
         base.Dispose(disposing);
     }
 
-    #endregion
-
-    #region 配置重载读取与写入方法
-
+    /// <summary>全局配置实例。</summary>
     internal static Configuration Config = new();
 
+    /// <summary>
+    /// 处理 /reload 触发的配置重载。
+    /// </summary>
     private static void ReloadConfig(ReloadEventArgs args)
     {
         LoadConfig();
         args.Player.SendInfoMessage("[自动钓鱼]重新加载配置完毕。");
     }
 
+    /// <summary>
+    /// 读取并落盘配置。
+    /// </summary>
     private static void LoadConfig()
     {
         Config = Configuration.Read();
         Config.Write();
     }
 
-    #endregion
-
-    #region 玩家更新配置方法（创建配置结构）
-
+    /// <summary>玩家数据集合。</summary>
     internal static PlayerData Data = new();
 
+    /// <summary>
+    /// 玩家进入服务器时初始化其自动钓鱼配置。
+    /// </summary>
     private void OnJoin(JoinEventArgs args)
     {
         if (args == null || !Config.Enabled) return;
@@ -332,12 +341,12 @@ public class AutoFish : TerrariaPlugin
             };
     }
 
-    #endregion
-
-    #region 消耗模式:过期后关闭自动钓鱼方法
-
+    /// <summary>需要关闭钓鱼权限的玩家计数。</summary>
     private static int ClearCount; //需要关闭钓鱼权限的玩家计数
 
+    /// <summary>
+    /// 消耗模式下检测超时并关闭自动钓鱼权限。
+    /// </summary>
     private static void ExitMod(TSPlayer plr, PlayerData.ItemData data)
     {
         var mess2 = new StringBuilder();
@@ -363,6 +372,4 @@ public class AutoFish : TerrariaPlugin
             ClearCount = 0;
         }
     }
-
-    #endregion
 }

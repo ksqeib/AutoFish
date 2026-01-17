@@ -3,10 +3,14 @@ using TShockAPI;
 
 namespace AutoFish.AFMain;
 
+/// <summary>
+/// 插件配置模型，负责序列化与默认值初始化。
+/// </summary>
 internal class Configuration
 {
-    #region 预设参数方法
-
+    /// <summary>
+    /// 初始化默认的 Buff、鱼饵和额外渔获设置。
+    /// </summary>
     public void Ints()
     {
         BuffID = new Dictionary<int, int>
@@ -25,10 +29,6 @@ internal class Configuration
             // 29,3093,4345
         };
     }
-
-    #endregion
-
-    #region 实例变量
 
     [JsonProperty("插件开关", Order = -13)] public bool Enabled { get; set; } = true;
 
@@ -54,18 +54,21 @@ internal class Configuration
     public int[] DisableProjectile { get; set; } =
         new[] { 623, 625, 626, 627, 628, 831, 832, 833, 834, 835, 963, 970 };
 
-    #endregion
-
-    #region 读取与创建配置文件方法
-
+    /// <summary>配置文件路径。</summary>
     public static readonly string FilePath = Path.Combine(TShock.SavePath, "AutoFish.json");
 
+    /// <summary>
+    /// 将当前配置写入磁盘。
+    /// </summary>
     public void Write()
     {
         var json = JsonConvert.SerializeObject(this, Formatting.Indented);
         File.WriteAllText(FilePath, json);
     }
 
+    /// <summary>
+    /// 读取配置文件，若不存在则创建默认配置。
+    /// </summary>
     public static Configuration Read()
     {
         if (!File.Exists(FilePath))
@@ -79,6 +82,4 @@ internal class Configuration
         var jsonContent = File.ReadAllText(FilePath);
         return JsonConvert.DeserializeObject<Configuration>(jsonContent)!;
     }
-
-    #endregion
 }

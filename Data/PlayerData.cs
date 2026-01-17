@@ -5,8 +5,9 @@ public class PlayerData
     //玩家数据表（使用字典以便按玩家名快速检索）
     public Dictionary<string, ItemData> Items { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
-    #region 数据结构
-
+    /// <summary>
+    /// 玩家自动钓鱼相关配置。
+    /// </summary>
     public class ItemData
     {
         public ItemData(string name = "", bool enabled = true, bool mod = true, bool buff = true, int hookMax = 3,
@@ -42,6 +43,4 @@ public class PlayerData
         //记录时间
         public DateTime LogTime { get; set; }
     }
-
-    #endregion
 }
