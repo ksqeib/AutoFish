@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System;
+using System.Linq;
+using System.Text;
 using Terraria;
 using TShockAPI;
 
@@ -12,39 +14,39 @@ public class Commands
     /// <summary>
     ///     向玩家展示自动钓鱼指令帮助。
     /// </summary>
-    private static void HelpCmd(TSPlayer plr)
+    private static void HelpCmd(TSPlayer player)
     {
-        if (plr == null)
+        if (player == null)
         {
         }
         else
         {
             //普通玩家
-            if (!plr.HasPermission("autofish.admin"))
+            if (!player.HasPermission("autofish.admin"))
             {
-                var mess = new StringBuilder();
-                mess.AppendFormat("          [i:3455][c/AD89D5:自][c/D68ACA:动][c/DF909A:钓][c/E5A894:鱼][i:3454]");
+                var helpMessage = new StringBuilder();
+                helpMessage.AppendFormat("          [i:3455][c/AD89D5:自][c/D68ACA:动][c/DF909A:钓][c/E5A894:鱼][i:3454]");
 
 
-                mess.AppendFormat("\n/af -- 查看自动钓鱼菜单\n" +
+                helpMessage.AppendFormat("\n/af -- 查看自动钓鱼菜单\n" +
                                   "/af on -- 自动钓鱼[c/4686D4:开启]功能\n" +
                                   "/af off -- 自动钓鱼[c/F25055:关闭]功能\n" +
                                   "/af buff -- 开启丨关闭[c/F6B152:钓鱼BUFF]");
 
-                if (AutoFish.Config.DoorItems.Any()) mess.AppendFormat("\n/af loot -- 查看[c/F25055:额外渔获表]");
+                if (AutoFish.Config.DoorItems.Any()) helpMessage.AppendFormat("\n/af loot -- 查看[c/F25055:额外渔获表]");
 
-                if (AutoFish.Config.ConMod) mess.AppendFormat("\n/af list -- 列出消耗模式[c/F5F251:指定物品表]");
+                if (AutoFish.Config.ConMod) helpMessage.AppendFormat("\n/af list -- 列出消耗模式[c/F5F251:指定物品表]");
 
-                plr.SendMessage(mess.ToString(), 193, 223, 186);
+                player.SendMessage(helpMessage.ToString(), 193, 223, 186);
             }
 
             //管理员
             else
             {
-                var mess = new StringBuilder();
-                mess.AppendFormat("          [i:3455][c/AD89D5:自][c/D68ACA:动][c/DF909A:钓][c/E5A894:鱼][i:3454]");
+                var helpMessage = new StringBuilder();
+                helpMessage.AppendFormat("          [i:3455][c/AD89D5:自][c/D68ACA:动][c/DF909A:钓][c/E5A894:鱼][i:3454]");
 
-                mess.AppendFormat("\n/af on 或 off -- 自动钓鱼[c/4686D4:开启]|[c/F25055:关闭]功能\n" +
+                helpMessage.AppendFormat("\n/af on 或 off -- 自动钓鱼[c/4686D4:开启]|[c/F25055:关闭]功能\n" +
                                   "/af buff -- 开启丨关闭[c/F6B152:钓鱼BUFF]\n" +
                                   "/af buffcfg -- 开启丨关闭[c/F6B152:全局钓鱼BUFF]\n" +
                                   "/af more -- 开启丨关闭[c/DB48A7:多线模式]\n" +
@@ -52,15 +54,15 @@ public class Commands
                                   "/af mod -- 开启丨关闭[c/50D647:消耗模式]");
 
                 if (AutoFish.Config.ConMod)
-                    mess.AppendFormat("\n/af list -- 列出消耗[c/F5F251:指定物品表]\n" +
+                    helpMessage.AppendFormat("\n/af list -- 列出消耗[c/F5F251:指定物品表]\n" +
                                       "/af set 数量 -- 设置消耗[c/47C2D5:物品数量]要求\n" +
                                       "/af time 数字 -- 设置消耗[c/F6B152:自动时长]\n" +
                                       "/af add 或 del 物品名 -- [c/87DF86:添加]|[c/F25055:移除]消耗指定物品");
 
-                mess.AppendFormat("\n/af loot -- 查看[c/F25055:额外渔获表]\n" +
+                helpMessage.AppendFormat("\n/af loot -- 查看[c/F25055:额外渔获表]\n" +
                                   "/af + 或 - 名字 -- 为额外渔获[c/87DF86:添加]|[c/F25055:移除]物品");
 
-                plr.SendMessage(mess.ToString(), 193, 223, 186);
+                player.SendMessage(helpMessage.ToString(), 193, 223, 186);
             }
         }
     }
@@ -70,25 +72,25 @@ public class Commands
     /// </summary>
     public static void Afs(CommandArgs args)
     {
-        var plr = args.Player;
+        var player = args.Player;
 
         if (!AutoFish.Config.Enabled) return;
 
-        var data = AutoFish.PlayerData.GetOrCreatePlayerData(plr.Name, AutoFish.CreateDefaultPlayerData);
+        var playerData = AutoFish.PlayerData.GetOrCreatePlayerData(player.Name, AutoFish.CreateDefaultPlayerData);
 
         //消耗模式下的剩余时间记录
-        var Minutes = AutoFish.Config.timer - (DateTime.Now - data.LogTime).TotalMinutes;
+        var remainingMinutes = AutoFish.Config.timer - (DateTime.Now - playerData.LogTime).TotalMinutes;
 
         if (args.Parameters.Count == 0)
         {
             HelpCmd(args.Player);
 
-            if (!data.Enabled)
+            if (!playerData.Enabled)
                 args.Player.SendSuccessMessage("请输入该指令开启→: [c/92C5EC:/af on]");
 
             //开启了消耗模式
             else if (AutoFish.Config.ConMod)
-                args.Player.SendMessage($"自动钓鱼[c/46C4D4:剩余时长]：[c/F3F292:{Math.Floor(Minutes)}]分钟", 243, 181, 145);
+                args.Player.SendMessage($"自动钓鱼[c/46C4D4:剩余时长]：[c/F3F292:{Math.Floor(remainingMinutes)}]分钟", 243, 181, 145);
 
             //检测到血月
             if (Main.bloodMoon)
@@ -102,30 +104,30 @@ public class Commands
         {
             if (args.Parameters[0].ToLower() == "on")
             {
-                data.Enabled = true;
+                playerData.Enabled = true;
                 args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:启用]自动钓鱼功能。");
                 return;
             }
 
             if (args.Parameters[0].ToLower() == "off")
             {
-                data.Enabled = false;
+                playerData.Enabled = false;
                 args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:禁用]自动钓鱼功能。");
                 return;
             }
 
             if (args.Parameters[0].ToLower() == "buff")
             {
-                if (!(plr.HasPermission("autofish.buff") || plr.HasPermission("autofish.admin")))
+                if (!(player.HasPermission("autofish.buff") || player.HasPermission("autofish.admin")))
                 {
                     args.Player.SendErrorMessage("你没有权限使用自动钓鱼BUFF功能。");
                     return;
                 }
 
-                var isEnabled = data.Buff;
-                data.Buff = !isEnabled;
-                var Mess = isEnabled ? "禁用" : "启用";
-                args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{Mess}]自动钓鱼BUFF");
+                var isEnabled = playerData.Buff;
+                playerData.Buff = !isEnabled;
+                    var toggleText = isEnabled ? "禁用" : "启用";
+                    args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{toggleText}]自动钓鱼BUFF");
                 return;
             }
 
@@ -148,14 +150,14 @@ public class Commands
             }
 
             //管理权限
-            if (plr.HasPermission("autofish.admin"))
+            if (player.HasPermission("autofish.admin"))
             {
                 if (args.Parameters[0].ToLower() == "more")
                 {
                     var isEnabled = AutoFish.Config.MoreHook;
                     AutoFish.Config.MoreHook = !isEnabled;
-                    var Mess = isEnabled ? "禁用" : "启用";
-                    args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{Mess}]多线模式");
+                    var toggleText = isEnabled ? "禁用" : "启用";
+                    args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{toggleText}]多线模式");
                     AutoFish.Config.Write();
                     return;
                 }
@@ -164,8 +166,8 @@ public class Commands
                 {
                     var isEnabled = AutoFish.Config.BuffEnabled;
                     AutoFish.Config.BuffEnabled = !isEnabled;
-                    var Mess = isEnabled ? "禁用" : "启用";
-                    args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{Mess}]全局钓鱼BUFF");
+                    var toggleText = isEnabled ? "禁用" : "启用";
+                    args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{toggleText}]全局钓鱼BUFF");
                     AutoFish.Config.Write();
                     return;
                 }
@@ -174,8 +176,8 @@ public class Commands
                 {
                     var isEnabled = AutoFish.Config.ConMod;
                     AutoFish.Config.ConMod = !isEnabled;
-                    var Mess = isEnabled ? "禁用" : "启用";
-                    args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{Mess}]消耗模式");
+                    var toggleText = isEnabled ? "禁用" : "启用";
+                    args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{toggleText}]消耗模式");
                     AutoFish.Config.Write();
                     return;
                 }
@@ -183,25 +185,25 @@ public class Commands
         }
 
         //管理权限
-        if (plr.HasPermission("autofish.admin"))
+            if (player.HasPermission("autofish.admin"))
             if (args.Parameters.Count == 2)
             {
                 Item item;
-                var Items = TShock.Utils.GetItemByIdOrName(args.Parameters[1]);
-                if (Items.Count > 1)
+                var matchedItems = TShock.Utils.GetItemByIdOrName(args.Parameters[1]);
+                if (matchedItems.Count > 1)
                 {
-                    args.Player.SendMultipleMatchError(Items.Select(i => i.Name));
+                    args.Player.SendMultipleMatchError(matchedItems.Select(i => i.Name));
                     return;
                 }
 
-                if (Items.Count == 0)
+                if (matchedItems.Count == 0)
                 {
                     args.Player.SendErrorMessage(
                         "不存在该物品，\"物品查询\": \"[c/92C5EC:https://terraria.wiki.gg/zh/wiki/Item_IDs]\"");
                     return;
                 }
 
-                item = Items[0];
+                item = matchedItems[0];
 
                 switch (args.Parameters[0].ToLower())
                 {

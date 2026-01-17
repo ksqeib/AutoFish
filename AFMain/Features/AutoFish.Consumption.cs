@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using System.Text;
 using AutoFish.Data;
 using Terraria.ID;
@@ -15,67 +17,67 @@ public partial class AutoFish
     /// </summary>
     private void OnPlayerUpdate(object? sender, GetDataHandlers.PlayerUpdateEventArgs e)
     {
-        var plr = e.Player;
+        var player = e.Player;
         if (!Config.Enabled) return;
         if (!Config.ConMod) return;
         if (e == null) return;
-        if (plr == null) return;
-        if (!plr.IsLoggedIn) return;
-        if (!plr.Active) return;
+        if (player == null) return;
+        if (!player.IsLoggedIn) return;
+        if (!player.Active) return;
 
-        var data = PlayerData.GetOrCreatePlayerData(plr.Name, CreateDefaultPlayerData);
-        if (!data.Enabled) return;
+        var playerData = PlayerData.GetOrCreatePlayerData(player.Name, CreateDefaultPlayerData);
+        if (!playerData.Enabled) return;
 
         // 播报玩家消耗鱼饵用的
-        var mess = new StringBuilder();
+        var consumedItemsMessage = new StringBuilder();
 
         //当玩家的自动钓鱼没开启时
-        if (!data.Mod)
+        if (!playerData.Mod)
         {
             //初始化一个消耗值
-            var sun = Config.BaitStack;
+            var requiredBait = Config.BaitStack;
 
             // 统计背包中指定鱼饵的总数量(不包含手上物品)
-            var TotalBait = plr.TPlayer.inventory.Sum(inv =>
-                Config.BaitType.Contains(inv.type) &&
-                inv.type != plr.TPlayer.inventory[plr.TPlayer.selectedItem].type
-                    ? inv.stack
+            var totalBait = player.TPlayer.inventory.Sum(slot =>
+                Config.BaitType.Contains(slot.type) &&
+                slot.type != player.TPlayer.inventory[player.TPlayer.selectedItem].type
+                    ? slot.stack
                     : 0);
 
             // 如果背包中有足够的鱼饵数量 和消耗值相等
-            if (TotalBait >= sun)
+            if (totalBait >= requiredBait)
             {
                 // 遍历背包58格
-                for (var i = 0; i < plr.TPlayer.inventory.Length && sun > 0; i++)
+                for (var i = 0; i < player.TPlayer.inventory.Length && requiredBait > 0; i++)
                 {
-                    var inv = plr.TPlayer.inventory[i];
+                    var inventorySlot = player.TPlayer.inventory[i];
 
                     // 是Config里指定的鱼饵,不是手上的物品
-                    if (Config.BaitType.Contains(inv.type))
+                    if (Config.BaitType.Contains(inventorySlot.type))
                     {
-                        var BaitStack = Math.Min(sun, inv.stack); // 计算需要消耗的鱼饵数量
+                        var consumedCount = Math.Min(requiredBait, inventorySlot.stack); // 计算需要消耗的鱼饵数量
 
-                        inv.stack -= BaitStack; // 从背包中扣除鱼饵
-                        sun -= BaitStack; // 减少消耗值
+                        inventorySlot.stack -= consumedCount; // 从背包中扣除鱼饵
+                        requiredBait -= consumedCount; // 减少消耗值
 
                         // 记录消耗的鱼饵数量到播报
-                        mess.AppendFormat(" [c/F25156:{0}]([c/AECDD1:{1}]) ", TShock.Utils.GetItemById(inv.type).Name,
-                            BaitStack);
+                        consumedItemsMessage.AppendFormat(" [c/F25156:{0}]([c/AECDD1:{1}]) ", TShock.Utils.GetItemById(inventorySlot.type).Name,
+                            consumedCount);
 
                         // 如果背包中的鱼饵数量为0，清空该格子
-                        if (inv.stack < 1) inv.TurnToAir();
+                        if (inventorySlot.stack < 1) inventorySlot.TurnToAir();
 
                         // 发包给背包里对应格子的鱼饵
-                        plr.SendData(PacketTypes.PlayerSlot, "", plr.Index, PlayerItemSlotID.Inventory0 + i);
+                        player.SendData(PacketTypes.PlayerSlot, "", player.Index, PlayerItemSlotID.Inventory0 + i);
                     }
                 }
 
                 // 消耗值清空时，开启自动钓鱼开关
-                if (sun <= 0)
+                if (requiredBait <= 0)
                 {
-                    data.Mod = true;
-                    data.LogTime = DateTime.Now;
-                    plr.SendMessage($"玩家 [c/46C2D4:{plr.Name}] 已开启[c/F5F251:自动钓鱼] 消耗物品为:{mess}", 247, 244, 150);
+                    playerData.Mod = true;
+                    playerData.LogTime = DateTime.Now;
+                    player.SendMessage($"玩家 [c/46C2D4:{player.Name}] 已开启[c/F5F251:自动钓鱼] 消耗物品为:{consumedItemsMessage}", 247, 244, 150);
                 }
             }
         }
@@ -83,35 +85,35 @@ public partial class AutoFish
         else //当 data.Mod 开启时
         {
             //由它判断关闭自动钓鱼
-            ExitMod(plr, data);
+            ExitMod(player, playerData);
         }
     }
 
     /// <summary>
     ///     消耗模式下检测超时并关闭自动钓鱼权限。
     /// </summary>
-    private static void ExitMod(TSPlayer plr, AFPlayerData.ItemData data)
+    private static void ExitMod(TSPlayer player, AFPlayerData.ItemData playerData)
     {
-        var mess2 = new StringBuilder();
-        mess2.AppendLine("[i:3455][c/AD89D5:自][c/D68ACA:动][c/DF909A:钓][c/E5A894:鱼][i:3454]");
-        mess2.AppendLine($"以下玩家超过 [c/E17D8C:{Config.timer}] 分钟 已关闭[c/76D5B4:自动钓鱼]权限：");
+        var expiredMessage = new StringBuilder();
+        expiredMessage.AppendLine("[i:3455][c/AD89D5:自][c/D68ACA:动][c/DF909A:钓][c/E5A894:鱼][i:3454]");
+        expiredMessage.AppendLine($"以下玩家超过 [c/E17D8C:{Config.timer}] 分钟 已关闭[c/76D5B4:自动钓鱼]权限：");
 
         // 只显示分钟
-        var Minutes = (DateTime.Now - data.LogTime).TotalMinutes;
+        var minutesElapsed = (DateTime.Now - playerData.LogTime).TotalMinutes;
 
         // 时间过期 关闭自动钓鱼权限
-        if (Minutes >= Config.timer)
+        if (minutesElapsed >= Config.timer)
         {
             ClearCount++;
-            data.Mod = false;
-            data.LogTime = default; // 清空记录时间
-            mess2.AppendFormat("[c/A7DDF0:{0}]:[c/74F3C9:{1}分钟]", data.Name, Math.Floor(Minutes));
+            playerData.Mod = false;
+            playerData.LogTime = default; // 清空记录时间
+            expiredMessage.AppendFormat("[c/A7DDF0:{0}]:[c/74F3C9:{1}分钟]", playerData.Name, Math.Floor(minutesElapsed));
         }
 
         // 确保有一个玩家计数，只播报一次
-        if (ClearCount > 0 && mess2.Length > 0)
+        if (ClearCount > 0 && expiredMessage.Length > 0)
         {
-            plr.SendMessage(mess2.ToString(), 247, 244, 150);
+            player.SendMessage(expiredMessage.ToString(), 247, 244, 150);
             ClearCount = 0;
         }
     }

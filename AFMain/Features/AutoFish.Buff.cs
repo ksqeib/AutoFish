@@ -10,23 +10,23 @@ public partial class AutoFish
     /// </summary>
     public void BuffUpdate(object sender, GetDataHandlers.NewProjectileEventArgs e)
     {
-        var plr = e.Player;
+        var player = e.Player;
 
-        if (plr == null) return;
-        if (!plr.Active) return;
-        if (!plr.IsLoggedIn) return;
+        if (player == null) return;
+        if (!player.Active) return;
+        if (!player.IsLoggedIn) return;
         if (!Config.Enabled) return;
         if (!Config.BuffEnabled) return;
 
         // 从数据表中获取与玩家名字匹配的配置项
-        var list = PlayerData.GetOrCreatePlayerData(plr.Name, CreateDefaultPlayerData);
-        if (!list.Buff) return;
+        var playerData = PlayerData.GetOrCreatePlayerData(player.Name, CreateDefaultPlayerData);
+        if (!playerData.Buff) return;
 
         //出现鱼钩摆动就给玩家施加buff
-        if (!list.Enabled) return;
+        if (!playerData.Enabled) return;
         if (!Tools.BobbersActive(e.Owner)) return;
 
         foreach (var buff in Config.BuffID)
-            plr.SetBuff(buff.Key, buff.Value);
+            player.SetBuff(buff.Key, buff.Value);
     }
 }

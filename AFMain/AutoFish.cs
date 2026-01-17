@@ -1,4 +1,6 @@
-﻿using AutoFish.Data;
+﻿using System;
+using System.Linq;
+using AutoFish.Data;
 using Terraria;
 using TerrariaApi.Server;
 using TShockAPI;
@@ -40,11 +42,11 @@ public partial class AutoFish : TerrariaPlugin
     internal static AFPlayerData.ItemData CreateDefaultPlayerData(string playerName)
     {
         // Attempt to resolve current player to seed defaults from permissions
-        var plr = TShock.Players.FirstOrDefault(p => p != null && p.Active &&
-                                                     p.Name.Equals(playerName, StringComparison.OrdinalIgnoreCase));
+        var player = TShock.Players.FirstOrDefault(p => p != null && p.Active &&
+                                p.Name.Equals(playerName, StringComparison.OrdinalIgnoreCase));
 
-        var canBuff = plr != null && (plr.HasPermission("autofish.buff") || plr.HasPermission("autofish.admin"));
-        var canMulti = plr != null && (plr.HasPermission("autofish.multihook") || plr.HasPermission("autofish.admin"));
+        var canBuff = player != null && (player.HasPermission("autofish.buff") || player.HasPermission("autofish.admin"));
+        var canMulti = player != null && (player.HasPermission("autofish.multihook") || player.HasPermission("autofish.admin"));
 
         return new AFPlayerData.ItemData
         {
