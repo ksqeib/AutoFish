@@ -51,6 +51,7 @@ public partial class AutoFish
         var noCatch = true;
         var activePlayerCount = TShock.Players.Count(p => p != null && p.Active && p.IsLoggedIn);
         var dropLimit = Tools.GetLimit(activePlayerCount); //根据人数动态调整Limit
+        var caughtMonster = false;
         for (var count = 0; noCatch && count < dropLimit; count++)
         {
             //61就是直接调用AI_061_FishingBobber
@@ -71,14 +72,19 @@ public partial class AutoFish
             if (Config.ExtraCatchItemIds.Any())
                 if (catchId <= 0) //额外渔获这里。。负数应该是boss
                     catchId = Config.ExtraCatchItemIds[Main.rand.Next(Config.ExtraCatchItemIds.Count)];
-            
+
             // 怪物生成使用localAI[1]，而物品则使用ai[1]，小于0情况无需处理，是刷血月怪
             if (catchId > 0)
             {
                 //ai[1] = localAI[1]
                 args.Projectile.ai[1] = catchId;
             }
-            
+
+            if (catchId < 0)
+            {
+                caughtMonster = true;
+            }
+
             noCatch = catchId == 0;
         }
 
@@ -105,6 +111,8 @@ public partial class AutoFish
             player.SendData(PacketTypes.PlayerSlot, "", player.Index, locate);
         }
 
+        if (caughtMonster) return; //抓到怪物好像不会kill掉原始弹幕，会导致刷弹幕
+        
         var velocity = new Vector2(0, 0);
         var pos = new Vector2(args.Projectile.position.X, args.Projectile.position.Y + 3);
         var index = SpawnProjectile.NewProjectile(
@@ -112,7 +120,8 @@ public partial class AutoFish
             pos, velocity, args.Projectile.type, 0, 0,
             args.Projectile.owner);
         player.SendData(PacketTypes.ProjectileNew, "", index);
-        player.SendData(PacketTypes.ProjectileDestroy, "", args.Projectile.whoAmI);
+        
+        // player.SendData(PacketTypes.ProjectileDestroy, "", args.Projectile.whoAmI);
     }
 
     private static int LocateBait(TSPlayer player, int baitUsed)
