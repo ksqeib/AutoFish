@@ -6,6 +6,7 @@
 *.user
 *.sln.docstates
 *.vsidx
+.vs
 
 # Build results
 

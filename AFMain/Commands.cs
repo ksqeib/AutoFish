@@ -93,12 +93,6 @@ public class Commands
             else if (AutoFish.Config.GlobalConsumptionModeEnabled)
                 args.Player.SendMessage($"自动钓鱼[c/46C4D4:剩余时长]：[c/F3F292:{Math.Floor(remainingMinutes)}]分钟", 243, 181,
                     145);
-
-            //检测到血月
-            if (Main.bloodMoon)
-                args.Player.SendMessage("当前为[c/F25055:血月]无法钓上怪物，可[c/46C4D4:关闭]插件：[c/F3F292:/af fish]", 243, 181,
-                    145);
-
             return;
         }
 
