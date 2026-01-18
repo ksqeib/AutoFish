@@ -125,3 +125,7 @@
 - 优先发issued -> 共同维护的插件库：https://github.com/UnrealMultiple/TShockPlugin
 - 次优先：TShock官方群：816771079
 - 大概率看不到但是也可以：国内社区trhub.cn ，bbstr.net , tr.monika.love
+
+## 已知问题
+- 非SSC服务器不扣鱼饵
+- 偶发性客户端和服务端鱼饵数量对不上

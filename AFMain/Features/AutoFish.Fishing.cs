@@ -38,44 +38,9 @@ public partial class AutoFish
 
         args.Projectile.ai[0] = 1.0f;
 
-        var baitItem = new Item();
-
-        // 检查并选择消耗饵料
-        // 模拟玩家收杆
-        player.TPlayer.ItemCheck_CheckFishingBobber_PickAndConsumeBait(args.Projectile, out var pull,
-            out var baitUsed);
-        if (pull)
-        {
-            //原版收杆函数
-            player.TPlayer.ItemCheck_CheckFishingBobber_PullBobber(args.Projectile, baitUsed);
-            //这里会使得  bobber.ai[1] = bobber.localAI[1];
-
-            // 更新玩家背包 使用饵料信息
-            for (var i = 0; i < player.TPlayer.inventory.Length; i++)
-            {
-                var inventorySlot = player.TPlayer.inventory[i];
-
-                //玩家饵料（指的是你手上鱼竿上的那个数字），使用的饵料是背包里的物品
-                if (inventorySlot.bait <= 0 || baitUsed != inventorySlot.type) continue;
-                //当物品数量正常则开始进入钓鱼检查
-                if (inventorySlot.stack > 1)
-                {
-                    //发包到对应饵料的格子内
-                    player.SendData(PacketTypes.PlayerSlot, "", player.Index, i);
-                    break;
-                }
-
-                //当前物品数量为1则移除（避免选中的饵不会主动消失 变成无限饵 或 卡住线程）
-                if (inventorySlot.stack > 1 && inventorySlot.bait > 1) continue;
-
-                inventorySlot.TurnToAir();
-                player.SendData(PacketTypes.PlayerSlot, "", player.Index, i);
-                break;
-            }
-        }
-
+        var fishingConditions = player.TPlayer.GetFishingConditions();
         //松露虫 判断一下玩家是否在海边
-        if (baitItem.type == 2673 && player.X / 16 == Main.oceanBG && player.Y / 16 == Main.oceanBG)
+        if (fishingConditions.BaitItemType == 2673 && player.X / 16 == Main.oceanBG && player.Y / 16 == Main.oceanBG)
         {
             args.Projectile.ai[1] = 0;
             player.SendData(PacketTypes.ProjectileNew, "", args.Projectile.whoAmI);
@@ -125,6 +90,40 @@ public partial class AutoFish
         // }
         // 这里发的是连续弹幕 避免线断 因为弹幕是不需要玩家物理点击来触发收杆的
         player.SendData(PacketTypes.ProjectileNew, "", args.Projectile.whoAmI);
+        
+        // 让服务器扣饵料
+        player.TPlayer.ItemCheck_CheckFishingBobber_PickAndConsumeBait(args.Projectile, out var pull,
+            out var baitUsed);
+        if (pull)
+        {
+            //原版收杆函数
+            player.TPlayer.ItemCheck_CheckFishingBobber_PullBobber(args.Projectile, baitUsed);
+            //这里会使得  bobber.ai[1] = bobber.localAI[1];
+
+            // 更新玩家背包 使用饵料信息
+            for (var i = 0; i < player.TPlayer.inventory.Length; i++)
+            {
+                var inventorySlot = player.TPlayer.inventory[i];
+
+                //玩家饵料（指的是你手上鱼竿上的那个数字），使用的饵料是背包里的物品
+                if (inventorySlot.bait <= 0 || baitUsed != inventorySlot.type) continue;
+                //当物品数量正常则开始进入钓鱼检查
+                if (inventorySlot.stack > 1)
+                {
+                    //发包到对应饵料的格子内
+                    player.SendData(PacketTypes.PlayerSlot, "", player.Index, i);
+                    break;
+                }
+
+                //当前物品数量为1则移除（避免选中的饵不会主动消失 变成无限饵 或 卡住线程）
+                if (inventorySlot.stack > 1 && inventorySlot.bait > 1) continue;
+
+                inventorySlot.TurnToAir();
+                player.SendData(PacketTypes.PlayerSlot, "", player.Index, i);
+                break;
+            }
+        }
+        
         var index = SpawnProjectile.NewProjectile(
             Main.projectile[args.Projectile.whoAmI].GetProjectileSource_FromThis(),
             args.Projectile.position, args.Projectile.velocity, args.Projectile.type, 0, 0,
