@@ -1,10 +1,9 @@
-using System;
-using System.Linq;
 using AutoFish.Utils;
 using Terraria;
 using Terraria.ID;
 using TerrariaApi.Server;
 using TShockAPI;
+using Vector2 = Microsoft.Xna.Framework.Vector2;
 
 namespace AutoFish.AFMain;
 
@@ -102,9 +101,10 @@ public partial class AutoFish
             player.SendData(PacketTypes.PlayerSlot, "", player.Index, locate);
         }
 
+        var velocity = new Vector2(0, 0);
         var index = SpawnProjectile.NewProjectile(
             Main.projectile[args.Projectile.whoAmI].GetProjectileSource_FromThis(),
-            args.Projectile.position, args.Projectile.velocity, args.Projectile.type, 0, 0,
+            args.Projectile.position, velocity, args.Projectile.type, 0, 0,
             args.Projectile.owner);
         player.SendData(PacketTypes.ProjectileNew, "", index);
     }

@@ -34,8 +34,8 @@ public class SpawnProjectile
 
         var projectile = Main.projectile[num];
         projectile.SetDefaults(Type);
-        projectile.position.X = X - projectile.width * 0.5f;
-        projectile.position.Y = Y - projectile.height * 0.5f;
+        projectile.position.X = X;
+        projectile.position.Y = Y;
         projectile.owner = Owner;
         projectile.velocity.X = SpeedX;
         projectile.velocity.Y = SpeedY;
