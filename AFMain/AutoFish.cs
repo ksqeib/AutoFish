@@ -56,7 +56,8 @@ public partial class AutoFish : TerrariaPlugin
             BuffEnabled = canBuff && Config.GlobalBuffFeatureEnabled,
             ConsumptionEnabled = false,
             HookMaxNum = Config.GlobalMultiHookMaxNum,
-            MultiHookEnabled = canMulti && Config.GlobalMultiHookFeatureEnabled
+              MultiHookEnabled = canMulti && Config.GlobalMultiHookFeatureEnabled,
+              FirstFishHintShown = false
         };
     }
 
@@ -75,6 +76,7 @@ public partial class AutoFish : TerrariaPlugin
         GeneralHooks.ReloadEvent += ReloadConfig;
         GetDataHandlers.NewProjectile += ProjectNew!;
         GetDataHandlers.NewProjectile += BuffUpdate!;
+        GetDataHandlers.NewProjectile += FirstFishHint!;
         GetDataHandlers.PlayerUpdate.Register(OnPlayerUpdate);
         ServerApi.Hooks.ProjectileAIUpdate.Register(this, ProjectAiUpdate);
         TShockAPI.Commands.ChatCommands.Add(new Command("autofish", Commands.Afs, "af", "autofish"));
@@ -90,6 +92,7 @@ public partial class AutoFish : TerrariaPlugin
             GeneralHooks.ReloadEvent -= ReloadConfig;
             GetDataHandlers.NewProjectile -= ProjectNew!;
             GetDataHandlers.NewProjectile -= BuffUpdate!;
+            GetDataHandlers.NewProjectile -= FirstFishHint!;
             GetDataHandlers.PlayerUpdate.UnRegister(OnPlayerUpdate);
             ServerApi.Hooks.ProjectileAIUpdate.Deregister(this, ProjectAiUpdate);
             TShockAPI.Commands.ChatCommands.RemoveAll(x => x.CommandDelegate == Commands.Afs);

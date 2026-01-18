@@ -17,7 +17,7 @@ internal class Configuration
 
     [JsonProperty("插件开关", Order = -13)] public bool PluginEnabled { get; set; } = true;
 
-    [JsonProperty("自动钓鱼开关", Order = -12)] public bool GlobalAutoFishFeatureEnabled { get; set; } = true;
+    [JsonProperty("自动钓鱼开关", Order = -12)] public bool GlobalAutoFishFeatureEnabled { get; set; }
     [JsonProperty("多钩钓鱼", Order = -11)] public bool GlobalMultiHookFeatureEnabled { get; set; }
     [JsonProperty("Buff开关", Order = -8)] public bool GlobalBuffFeatureEnabled { get; set; }
     [JsonProperty("多钩上限", Order = -9)] public int GlobalMultiHookMaxNum { get; set; } = 5;
