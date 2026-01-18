@@ -25,9 +25,20 @@ public partial class AutoFish
         if (player == null) return;
         if (!player.Active) return;
 
+        var skipNonStackableLoot = Config.GlobalSkipNonStackableLoot &&
+                                   HasFeaturePermission(player, "autofish.filter.unstackable");
+        var blockMonsterCatch = Config.GlobalBlockMonsterCatch &&
+                                HasFeaturePermission(player, "autofish.filter.monster");
+        var skipFishingAnimation = Config.GlobalSkipFishingAnimation &&
+                                   HasFeaturePermission(player, "autofish.skipanimation");
+
         // 从数据表中获取与玩家名字匹配的配置项
         var playerData = PlayerData.GetOrCreatePlayerData(player.Name, CreateDefaultPlayerData);
         if (!playerData.AutoFishEnabled) return;
+
+        skipNonStackableLoot &= playerData.SkipNonStackableLoot;
+        blockMonsterCatch &= playerData.BlockMonsterCatch;
+        skipFishingAnimation &= playerData.SkipFishingAnimation;
 
         // 正常状态下与消耗模式下启用自动钓鱼
         if (Config.GlobalConsumptionModeEnabled && !playerData.ConsumptionEnabled) return;
@@ -73,19 +84,30 @@ public partial class AutoFish
                 if (catchId <= 0) //额外渔获这里。。负数应该是boss
                     catchId = Config.ExtraCatchItemIds[Main.rand.Next(Config.ExtraCatchItemIds.Count)];
 
+            noCatch = catchId == 0;
+
             // 怪物生成使用localAI[1]，而物品则使用ai[1]，小于0情况无需处理，是刷血月怪
             if (catchId > 0)
             {
+                if (skipNonStackableLoot)
+                {
+                    var item = new Item();
+                    item.SetDefaults((int)catchId);
+                    if (item.maxStack == 1)
+                    {
+                        continue;
+                    }
+                }
+
                 //ai[1] = localAI[1]
                 args.Projectile.ai[1] = catchId;
             }
 
             if (catchId < 0)
             {
+                if (blockMonsterCatch) continue;
                 caughtMonster = true;
             }
-
-            noCatch = catchId == 0;
         }
 
         if (noCatch) return; //小于0不加新的
@@ -112,7 +134,7 @@ public partial class AutoFish
         }
 
         if (caughtMonster) return; //抓到怪物好像不会kill掉原始弹幕，会导致刷弹幕
-        
+
         var velocity = new Vector2(0, 0);
         var pos = new Vector2(args.Projectile.position.X, args.Projectile.position.Y + 3);
         var index = SpawnProjectile.NewProjectile(
@@ -120,8 +142,12 @@ public partial class AutoFish
             pos, velocity, args.Projectile.type, 0, 0,
             args.Projectile.owner);
         player.SendData(PacketTypes.ProjectileNew, "", index);
-        
-        // player.SendData(PacketTypes.ProjectileDestroy, "", args.Projectile.whoAmI);
+
+        if (skipFishingAnimation)
+        {
+            //跳过上鱼动画
+            player.SendData(PacketTypes.ProjectileDestroy, "", args.Projectile.whoAmI);
+        }
     }
 
     private static int LocateBait(TSPlayer player, int baitUsed)

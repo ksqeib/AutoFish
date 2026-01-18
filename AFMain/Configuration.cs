@@ -13,27 +13,31 @@ internal class Configuration
     /// <summary>配置文件路径。</summary>
     public static readonly string FilePath = Path.Combine(TShock.SavePath, "AutoFish.json");
 
+    [JsonProperty("插件总开关", Order = -100)] public bool PluginEnabled { get; set; } = true;
+    [JsonProperty("全局自动钓鱼开关", Order = -99)] public bool GlobalAutoFishFeatureEnabled { get; set; } = true;
+    [JsonProperty("全局Buff开关", Order = -98)] public bool GlobalBuffFeatureEnabled { get; set; } = true;
+    [JsonProperty("全局多钩钓鱼开关", Order = -97)] public bool GlobalMultiHookFeatureEnabled { get; set; } = true;
+    [JsonProperty("全局消耗模式开关", Order = -96)] public bool GlobalConsumptionModeEnabled { get; set; }
+
+    [JsonProperty("全局过滤不可堆叠物品", Order = -90)] public bool GlobalSkipNonStackableLoot { get; set; } = true;
+    [JsonProperty("默认过滤不可堆叠物品", Order = -89)] public bool DefaultSkipNonStackableLoot { get; set; } = true;
+
+    [JsonProperty("全局不钓怪物", Order = -88)] public bool GlobalBlockMonsterCatch { get; set; } = true;
+    [JsonProperty("默认不钓怪物", Order = -87)] public bool DefaultBlockMonsterCatch { get; set; } = true;
+
+    [JsonProperty("全局跳过上鱼动画", Order = -86)] public bool GlobalSkipFishingAnimation { get; set; } = true;
+    [JsonProperty("默认跳过上鱼动画", Order = -85)] public bool DefaultSkipFishingAnimation { get; set; } = true;
+
     [JsonProperty("额外渔获", Order = -1)] public List<int> ExtraCatchItemIds = new();
 
-    [JsonProperty("插件开关", Order = -13)] public bool PluginEnabled { get; set; } = true;
-
-    [JsonProperty("全局自动钓鱼开关", Order = -12)]
-    public bool GlobalAutoFishFeatureEnabled { get; set; } = true;
-
-    [JsonProperty("全局多钩钓鱼开关", Order = -11)] public bool GlobalMultiHookFeatureEnabled { get; set; } = true;
-    [JsonProperty("全局Buff开关", Order = -8)] public bool GlobalBuffFeatureEnabled { get; set; } = true;
+    [JsonProperty("随机物品", Order = -10)] public bool RandomLootEnabled { get; set; }
+    [JsonProperty("多钩上限", Order = -9)] public int GlobalMultiHookMaxNum { get; set; } = 5;
     [JsonProperty("默认自动钓鱼开关", Order = -7)] public bool DefaultAutoFishEnabled { get; set; } = false;
     [JsonProperty("默认Buff开关", Order = -6)] public bool DefaultBuffEnabled { get; set; } = false;
     [JsonProperty("默认多钩开关", Order = -5)] public bool DefaultMultiHookEnabled { get; set; } = false;
     [JsonProperty("默认消耗模式", Order = -4)] public bool DefaultConsumptionEnabled { get; set; } = false;
-    [JsonProperty("多钩上限", Order = -9)] public int GlobalMultiHookMaxNum { get; set; } = 5;
-
-    [JsonProperty("随机物品", Order = -10)] public bool RandomLootEnabled { get; set; }
-
 
     [JsonProperty("Buff表", Order = -5)] public Dictionary<int, int> BuffDurations { get; set; } = new();
-
-    [JsonProperty("消耗模式", Order = -4)] public bool GlobalConsumptionModeEnabled { get; set; }
 
     [JsonProperty("消耗数量", Order = -3)] public int BaitConsumeCount { get; set; } = 10;
 

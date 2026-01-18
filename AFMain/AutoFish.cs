@@ -25,7 +25,7 @@ public partial class AutoFish : TerrariaPlugin
     }
 
     /// <summary>插件名称。</summary>
-    public override string Name => "自动钓鱼";
+    public override string Name => "自动钓鱼R";
 
     /// <summary>插件作者。</summary>
     public override string Author => "羽学 少司命 ksqeib";
@@ -48,11 +48,20 @@ public partial class AutoFish : TerrariaPlugin
         var canBuff = HasFeaturePermission(player, "autofish.buff");
         var canMulti = HasFeaturePermission(player, "autofish.multihook");
         var canFish = HasFeaturePermission(player, "autofish.fish");
+        var canSkipNonStackable = HasFeaturePermission(player, "autofish.filter.unstackable");
+        var canBlockMonster = HasFeaturePermission(player, "autofish.filter.monster");
+        var canSkipAnimation = HasFeaturePermission(player, "autofish.skipanimation");
 
-        var defaultAutoFish = Config.DefaultAutoFishEnabled && Config.GlobalAutoFishFeatureEnabled && canFish;
-        var defaultBuff = Config.DefaultBuffEnabled && Config.GlobalBuffFeatureEnabled && canBuff;
-        var defaultMulti = Config.DefaultMultiHookEnabled && Config.GlobalMultiHookFeatureEnabled && canMulti;
-        var defaultConsumption = Config.DefaultConsumptionEnabled && Config.GlobalConsumptionModeEnabled;
+        var defaultAutoFish = Config.DefaultAutoFishEnabled && canFish;
+        var defaultBuff = Config.DefaultBuffEnabled && canBuff;
+        var defaultMulti = Config.DefaultMultiHookEnabled && canMulti;
+        var defaultConsumption = Config.DefaultConsumptionEnabled;
+        var defaultSkipNonStackable = Config.GlobalSkipNonStackableLoot && Config.DefaultSkipNonStackableLoot &&
+                           canSkipNonStackable;
+        var defaultBlockMonster = Config.GlobalBlockMonsterCatch && Config.DefaultBlockMonsterCatch &&
+                       canBlockMonster;
+        var defaultSkipAnimation = Config.GlobalSkipFishingAnimation && Config.DefaultSkipFishingAnimation &&
+                        canSkipAnimation;
 
         return new AFPlayerData.ItemData
         {
@@ -62,6 +71,9 @@ public partial class AutoFish : TerrariaPlugin
             ConsumptionEnabled = defaultConsumption,
             HookMaxNum = Config.GlobalMultiHookMaxNum,
             MultiHookEnabled = defaultMulti,
+            SkipNonStackableLoot = defaultSkipNonStackable,
+            BlockMonsterCatch = defaultBlockMonster,
+            SkipFishingAnimation = defaultSkipAnimation,
             FirstFishHintShown = false
         };
     }

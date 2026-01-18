@@ -36,6 +36,15 @@ public class Commands
             helpMessage.Append("\n/af hook 数字 -- 设置个人钩子上限 (<= 全局上限)");
         }
 
+        if (AutoFish.Config.GlobalSkipNonStackableLoot && AutoFish.HasFeaturePermission(player, "autofish.filter.unstackable"))
+            helpMessage.Append("\n/af stack -- 开启丨关闭[c/F4C17F:过滤不可堆叠渔获]");
+
+        if (AutoFish.Config.GlobalBlockMonsterCatch && AutoFish.HasFeaturePermission(player, "autofish.filter.monster"))
+            helpMessage.Append("\n/af monster -- 开启丨关闭[c/F48FB1:不钓怪物]");
+
+        if (AutoFish.Config.GlobalSkipFishingAnimation && AutoFish.HasFeaturePermission(player, "autofish.skipanimation"))
+            helpMessage.Append("\n/af anim -- 开启丨关闭[c/8EC4F4:跳过上鱼动画]");
+
         if (AutoFish.Config.GlobalConsumptionModeEnabled)
             helpMessage.Append("\n/af list -- 列出消耗模式[c/F5F251:指定物品表]");
 
@@ -63,6 +72,9 @@ public class Commands
 
             helpMessage.Append("\n[全局] /af gaddloot 物品名 -- 添加额外渔获");
             helpMessage.Append("\n[全局] /af gdelloot 物品名 -- 移除额外渔获");
+            helpMessage.Append("\n[全局] /af gstack -- 开启丨关闭过滤不可堆叠渔获");
+            helpMessage.Append("\n[全局] /af gmonster -- 开启丨关闭不钓怪物");
+            helpMessage.Append("\n[全局] /af gani -- 开启丨关闭跳过上鱼动画");
         }
 
         player.SendMessage(helpMessage.ToString(), 193, 223, 186);
@@ -90,7 +102,7 @@ public class Commands
                 args.Player.SendSuccessMessage("请输入该指令开启→: [c/92C5EC:/af fish]");
 
             //开启了消耗模式
-            else if (AutoFish.Config.GlobalConsumptionModeEnabled)
+            else if (playerData.ConsumptionEnabled)
                 args.Player.SendMessage($"自动钓鱼[c/46C4D4:剩余时长]：[c/F3F292:{Math.Floor(remainingMinutes)}]分钟", 243, 181,
                     145);
             return;
@@ -99,7 +111,7 @@ public class Commands
         if (HandlePlayerCommand(args, playerData, remainingMinutes))
             return;
 
-        if (HandleAdminCommand(args, playerData))
+        if (HandleAdminCommand(args))
             return;
 
         HelpCmd(args.Player);
@@ -115,8 +127,11 @@ public class Commands
         sb.AppendLine($"功能：{(playerData.AutoFishEnabled ? "开启" : "关闭")}");
         sb.AppendLine($"BUFF：{(playerData.BuffEnabled ? "开启" : "关闭")}");
         sb.AppendLine($"多钩：{(playerData.MultiHookEnabled ? "开启" : "关闭")}, 钩子上限：{playerData.HookMaxNum}");
+        sb.AppendLine($"过滤不可堆叠：{(playerData.SkipNonStackableLoot ? "开启" : "关闭")}");
+        sb.AppendLine($"不钓怪物：{(playerData.BlockMonsterCatch ? "开启" : "关闭")}");
+        sb.AppendLine($"跳过上鱼动画：{(playerData.SkipFishingAnimation ? "开启" : "关闭")}");
 
-        if (AutoFish.Config.GlobalConsumptionModeEnabled)
+        if (AutoFish.Config.BaitItemIds.Any() || playerData.ConsumptionEnabled)
         {
             var minutesLeft = Math.Max(0, Math.Floor(remainingMinutes));
             var consumeLine = playerData.ConsumptionEnabled
@@ -178,7 +193,55 @@ public class Commands
                 case "status":
                     SendStatus(args.Player, playerData, remainingMinutes);
                     return true;
-                case "list" when AutoFish.Config.GlobalConsumptionModeEnabled:
+                case "stack":
+                    if (!AutoFish.Config.GlobalSkipNonStackableLoot)
+                    {
+                        args.Player.SendWarningMessage("过滤不可堆叠未在全局开启，无法切换。");
+                        return true;
+                    }
+
+                    if (!AutoFish.HasFeaturePermission(player, "autofish.filter.unstackable"))
+                    {
+                        args.Player.SendErrorMessage("你没有权限使用过滤不可堆叠功能。");
+                        return true;
+                    }
+
+                    playerData.SkipNonStackableLoot = !playerData.SkipNonStackableLoot;
+                    args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{(playerData.SkipNonStackableLoot ? "启用" : "禁用")}]过滤不可堆叠渔获。");
+                    return true;
+                case "monster":
+                    if (!AutoFish.Config.GlobalBlockMonsterCatch)
+                    {
+                        args.Player.SendWarningMessage("不钓怪物未在全局开启，无法切换。");
+                        return true;
+                    }
+
+                    if (!AutoFish.HasFeaturePermission(player, "autofish.filter.monster"))
+                    {
+                        args.Player.SendErrorMessage("你没有权限使用不钓怪物功能。");
+                        return true;
+                    }
+
+                    playerData.BlockMonsterCatch = !playerData.BlockMonsterCatch;
+                    args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{(playerData.BlockMonsterCatch ? "启用" : "禁用")}]不钓怪物。");
+                    return true;
+                case "anim":
+                    if (!AutoFish.Config.GlobalSkipFishingAnimation)
+                    {
+                        args.Player.SendWarningMessage("跳过上鱼动画未在全局开启，无法切换。");
+                        return true;
+                    }
+
+                    if (!AutoFish.HasFeaturePermission(player, "autofish.skipanimation"))
+                    {
+                        args.Player.SendErrorMessage("你没有权限使用跳过上鱼动画功能。");
+                        return true;
+                    }
+
+                    playerData.SkipFishingAnimation = !playerData.SkipFishingAnimation;
+                    args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{(playerData.SkipFishingAnimation ? "启用" : "禁用")}]跳过上鱼动画。");
+                    return true;
+                case "list" when AutoFish.Config.BaitItemIds.Any():
                     args.Player.SendInfoMessage("[指定消耗物品表]\n" + string.Join(", ",
                         AutoFish.Config.BaitItemIds.Select(x =>
                             TShock.Utils.GetItemById(x).Name + "([c/92C5EC:{0}])".SFormat(x))));
@@ -241,7 +304,7 @@ public class Commands
         return false;
     }
 
-    private static bool HandleAdminCommand(CommandArgs args, AFPlayerData.ItemData playerData)
+    private static bool HandleAdminCommand(CommandArgs args)
     {
         if (!args.Player.HasPermission("autofish.admin")) return false;
 
@@ -257,7 +320,6 @@ public class Commands
                     var multiToggle = multiEnabled ? "禁用" : "启用";
                     args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{multiToggle}]多线模式");
                     AutoFish.Config.Write();
-                    playerData.MultiHookEnabled = AutoFish.Config.GlobalMultiHookFeatureEnabled;
                     return true;
                 case "gbuff":
                     var buffCfgEnabled = AutoFish.Config.GlobalBuffFeatureEnabled;
@@ -271,6 +333,21 @@ public class Commands
                     AutoFish.Config.GlobalConsumptionModeEnabled = !modEnabled;
                     var modToggle = modEnabled ? "禁用" : "启用";
                     args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{modToggle}]消耗模式");
+                    AutoFish.Config.Write();
+                    return true;
+                case "gstack":
+                    AutoFish.Config.GlobalSkipNonStackableLoot = !AutoFish.Config.GlobalSkipNonStackableLoot;
+                    args.Player.SendSuccessMessage($"已[c/92C5EC:{(AutoFish.Config.GlobalSkipNonStackableLoot ? "启用" : "禁用")}]全局过滤不可堆叠渔获。");
+                    AutoFish.Config.Write();
+                    return true;
+                case "gmonster":
+                    AutoFish.Config.GlobalBlockMonsterCatch = !AutoFish.Config.GlobalBlockMonsterCatch;
+                    args.Player.SendSuccessMessage($"已[c/92C5EC:{(AutoFish.Config.GlobalBlockMonsterCatch ? "启用" : "禁用")}]全局不钓怪物。");
+                    AutoFish.Config.Write();
+                    return true;
+                case "gani":
+                    AutoFish.Config.GlobalSkipFishingAnimation = !AutoFish.Config.GlobalSkipFishingAnimation;
+                    args.Player.SendSuccessMessage($"已[c/92C5EC:{(AutoFish.Config.GlobalSkipFishingAnimation ? "启用" : "禁用")}]全局跳过上鱼动画。");
                     AutoFish.Config.Write();
                     return true;
                 case "gset":
