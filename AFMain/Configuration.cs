@@ -17,9 +17,15 @@ internal class Configuration
 
     [JsonProperty("插件开关", Order = -13)] public bool PluginEnabled { get; set; } = true;
 
-    [JsonProperty("自动钓鱼开关", Order = -12)] public bool GlobalAutoFishFeatureEnabled { get; set; }
-    [JsonProperty("多钩钓鱼", Order = -11)] public bool GlobalMultiHookFeatureEnabled { get; set; }
-    [JsonProperty("Buff开关", Order = -8)] public bool GlobalBuffFeatureEnabled { get; set; }
+    [JsonProperty("全局自动钓鱼开关", Order = -12)]
+    public bool GlobalAutoFishFeatureEnabled { get; set; } = true;
+
+    [JsonProperty("全局多钩钓鱼开关", Order = -11)] public bool GlobalMultiHookFeatureEnabled { get; set; } = true;
+    [JsonProperty("全局Buff开关", Order = -8)] public bool GlobalBuffFeatureEnabled { get; set; } = true;
+    [JsonProperty("默认自动钓鱼开关", Order = -7)] public bool DefaultAutoFishEnabled { get; set; } = false;
+    [JsonProperty("默认Buff开关", Order = -6)] public bool DefaultBuffEnabled { get; set; } = false;
+    [JsonProperty("默认多钩开关", Order = -5)] public bool DefaultMultiHookEnabled { get; set; } = false;
+    [JsonProperty("默认消耗模式", Order = -4)] public bool DefaultConsumptionEnabled { get; set; } = false;
     [JsonProperty("多钩上限", Order = -9)] public int GlobalMultiHookMaxNum { get; set; } = 5;
 
     [JsonProperty("随机物品", Order = -10)] public bool RandomLootEnabled { get; set; }

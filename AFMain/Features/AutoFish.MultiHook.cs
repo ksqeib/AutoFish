@@ -26,7 +26,7 @@ public partial class AutoFish
 
         // 从数据表中获取与玩家名字匹配的配置项
         var playerData = PlayerData.GetOrCreatePlayerData(player.Name, CreateDefaultPlayerData);
-        if (!playerData.AutoFishEnabled) return;
+        if (!playerData.MultiHookEnabled) return;
 
         // 正常状态下与消耗模式下启用多线钓鱼
         if (Config.GlobalConsumptionModeEnabled && !playerData.ConsumptionEnabled) return;

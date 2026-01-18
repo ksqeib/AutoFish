@@ -49,15 +49,20 @@ public partial class AutoFish : TerrariaPlugin
         var canMulti = HasFeaturePermission(player, "autofish.multihook");
         var canFish = HasFeaturePermission(player, "autofish.fish");
 
+        var defaultAutoFish = Config.DefaultAutoFishEnabled && Config.GlobalAutoFishFeatureEnabled && canFish;
+        var defaultBuff = Config.DefaultBuffEnabled && Config.GlobalBuffFeatureEnabled && canBuff;
+        var defaultMulti = Config.DefaultMultiHookEnabled && Config.GlobalMultiHookFeatureEnabled && canMulti;
+        var defaultConsumption = Config.DefaultConsumptionEnabled && Config.GlobalConsumptionModeEnabled;
+
         return new AFPlayerData.ItemData
         {
             Name = playerName,
-            AutoFishEnabled = Config.GlobalAutoFishFeatureEnabled && canFish,
-            BuffEnabled = canBuff && Config.GlobalBuffFeatureEnabled,
-            ConsumptionEnabled = false,
+            AutoFishEnabled = defaultAutoFish,
+            BuffEnabled = defaultBuff,
+            ConsumptionEnabled = defaultConsumption,
             HookMaxNum = Config.GlobalMultiHookMaxNum,
-              MultiHookEnabled = canMulti && Config.GlobalMultiHookFeatureEnabled,
-              FirstFishHintShown = false
+            MultiHookEnabled = defaultMulti,
+            FirstFishHintShown = false
         };
     }
 
