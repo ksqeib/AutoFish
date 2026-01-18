@@ -48,10 +48,10 @@ public partial class AutoFish
 
         //修改钓鱼得到的东西
         //获得钓鱼物品方法
-        var hasCatch = false;
+        var noCatch = true;
         var activePlayerCount = TShock.Players.Count(p => p != null && p.Active && p.IsLoggedIn);
         var dropLimit = Tools.GetLimit(activePlayerCount); //根据人数动态调整Limit
-        for (var count = 0; !hasCatch && count < dropLimit; count++)
+        for (var count = 0; noCatch && count < dropLimit; count++)
         {
             //61就是直接调用AI_061_FishingBobber
             //原版方法，获取物品啥的
@@ -64,21 +64,25 @@ public partial class AutoFish
             // fishingLevel 鱼力
             // localAI[1]- 钓上来的东西
             // AI[1]- 鱼力
-
-            if (Config.RandomLootEnabled) args.Projectile.localAI[1] = Random.Shared.Next(1, ItemID.Count);
-
-            //ai[1] = localAI[1]
-            args.Projectile.ai[1] = args.Projectile.localAI[1];
+            var catchId = args.Projectile.localAI[1];
+            if (Config.RandomLootEnabled) catchId = Random.Shared.Next(1, ItemID.Count);
 
             // 如果额外渔获有任何1个物品ID，则参与AI[1]
             if (Config.ExtraCatchItemIds.Any())
-                if (args.Projectile.ai[1] <= 0) //额外渔获这里。。负数应该是boss
-                    args.Projectile.ai[1] = Config.ExtraCatchItemIds[Main.rand.Next(Config.ExtraCatchItemIds.Count)];
-
-            hasCatch = args.Projectile.ai[1] > 0;
+                if (catchId <= 0) //额外渔获这里。。负数应该是boss
+                    catchId = Config.ExtraCatchItemIds[Main.rand.Next(Config.ExtraCatchItemIds.Count)];
+            
+            // 怪物生成使用localAI[1]，而物品则使用ai[1]，小于0情况无需处理，是刷血月怪
+            if (catchId > 0)
+            {
+                //ai[1] = localAI[1]
+                args.Projectile.ai[1] = catchId;
+            }
+            
+            noCatch = catchId == 0;
         }
 
-        if (!hasCatch) return; //小于0不加新的
+        if (noCatch) return; //小于0不加新的
         // 原版给东西的代码，在kill函数，会把ai[1]给玩家
         // if (Main.myPlayer == this.owner && this.bobber)
         // {
@@ -102,11 +106,13 @@ public partial class AutoFish
         }
 
         var velocity = new Vector2(0, 0);
+        var pos = new Vector2(args.Projectile.position.X, args.Projectile.position.Y + 3);
         var index = SpawnProjectile.NewProjectile(
             Main.projectile[args.Projectile.whoAmI].GetProjectileSource_FromThis(),
-            args.Projectile.position, velocity, args.Projectile.type, 0, 0,
+            pos, velocity, args.Projectile.type, 0, 0,
             args.Projectile.owner);
         player.SendData(PacketTypes.ProjectileNew, "", index);
+        player.SendData(PacketTypes.ProjectileDestroy, "", args.Projectile.whoAmI);
     }
 
     private static int LocateBait(TSPlayer player, int baitUsed)
