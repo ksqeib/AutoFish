@@ -88,46 +88,38 @@ public partial class AutoFish
         //         this.AI_061_FishingBobber_GiveItemToPlayer(Main.player[this.owner], (int) this.ai[1]);
         //     this.ai[1] = 0.0f;
         // }
-        // 这里发的是连续弹幕 避免线断 因为弹幕是不需要玩家物理点击来触发收杆的
+        // 这里发的是连续弹幕 避免线断 因为弹幕是不需要玩家物理点击来触发收杆的，但是服务端和客户端概率测算不一样，会导致服务器扣了饵料，但是客户端没扣
         player.SendData(PacketTypes.ProjectileNew, "", args.Projectile.whoAmI);
-        
+
         // 让服务器扣饵料
+        var locate = LocateBait(player, fishingConditions.BaitItemType);
         player.TPlayer.ItemCheck_CheckFishingBobber_PickAndConsumeBait(args.Projectile, out var pull,
             out var baitUsed);
         if (pull)
         {
-            //原版收杆函数
+            //原版收杆函数，这里会使得  bobber.ai[1] = bobber.localAI[1];
             player.TPlayer.ItemCheck_CheckFishingBobber_PullBobber(args.Projectile, baitUsed);
-            //这里会使得  bobber.ai[1] = bobber.localAI[1];
-
-            // 更新玩家背包 使用饵料信息
-            for (var i = 0; i < player.TPlayer.inventory.Length; i++)
-            {
-                var inventorySlot = player.TPlayer.inventory[i];
-
-                //玩家饵料（指的是你手上鱼竿上的那个数字），使用的饵料是背包里的物品
-                if (inventorySlot.bait <= 0 || baitUsed != inventorySlot.type) continue;
-                //当物品数量正常则开始进入钓鱼检查
-                if (inventorySlot.stack > 1)
-                {
-                    //发包到对应饵料的格子内
-                    player.SendData(PacketTypes.PlayerSlot, "", player.Index, i);
-                    break;
-                }
-
-                //当前物品数量为1则移除（避免选中的饵不会主动消失 变成无限饵 或 卡住线程）
-                if (inventorySlot.stack > 1 && inventorySlot.bait > 1) continue;
-
-                inventorySlot.TurnToAir();
-                player.SendData(PacketTypes.PlayerSlot, "", player.Index, i);
-                break;
-            }
+            player.SendData(PacketTypes.PlayerSlot, "", player.Index, locate);
         }
-        
+
         var index = SpawnProjectile.NewProjectile(
             Main.projectile[args.Projectile.whoAmI].GetProjectileSource_FromThis(),
             args.Projectile.position, args.Projectile.velocity, args.Projectile.type, 0, 0,
             args.Projectile.owner);
         player.SendData(PacketTypes.ProjectileNew, "", index);
+    }
+
+    private static int LocateBait(TSPlayer player, int baitUsed)
+    {
+        // 更新玩家背包 使用饵料信息
+        for (var i = 0; i < player.TPlayer.inventory.Length; i++)
+        {
+            var inventorySlot = player.TPlayer.inventory[i];
+            // 玩家饵料（指的是你手上鱼竿上的那个数字），使用的饵料是背包里的物品
+            if (inventorySlot.bait <= 0 || baitUsed != inventorySlot.type) continue;
+            return i;
+        }
+
+        return 0;
     }
 }
