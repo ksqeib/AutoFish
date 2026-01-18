@@ -20,7 +20,7 @@ public partial class AutoFish
         if (!args.Projectile.active) return;
         if (!args.Projectile.bobber) return;
         if (!Config.PluginEnabled) return;
-        if (!Config.AutoFishFeatureEnabled) return;
+        if (!Config.GlobalAutoFishFeatureEnabled) return;
 
         var player = TShock.Players[args.Projectile.owner];
         if (player == null) return;
@@ -31,7 +31,7 @@ public partial class AutoFish
         if (!playerData.AutoFishEnabled) return;
 
         // 正常状态下与消耗模式下启用自动钓鱼
-        if (Config.ConsumptionModeEnabled && !playerData.ConsumptionEnabled) return;
+        if (Config.GlobalConsumptionModeEnabled && !playerData.ConsumptionEnabled) return;
 
         //检测是不是生成，是生成boss就不钓起来
         if (!(args.Projectile.ai[1] < 0)) return;

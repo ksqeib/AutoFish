@@ -16,7 +16,7 @@ public partial class AutoFish
         if (!player.Active) return;
         if (!player.IsLoggedIn) return;
         if (!Config.PluginEnabled) return;
-        if (!Config.GlobalBuffEnabled) return;
+        if (!Config.GlobalBuffFeatureEnabled) return;
 
         // 从数据表中获取与玩家名字匹配的配置项
         var playerData = PlayerData.GetOrCreatePlayerData(player.Name, CreateDefaultPlayerData);

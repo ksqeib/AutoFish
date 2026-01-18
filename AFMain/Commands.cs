@@ -20,15 +20,23 @@ public class Commands
         var helpMessage = new StringBuilder();
         helpMessage.Append("          [i:3455][c/AD89D5:自][c/D68ACA:动][c/DF909A:钓][c/E5A894:鱼][i:3454]");
 
-        // 个人指令
+        // 个人指令（按权限和全局开关过滤）
         helpMessage.Append("\n/af -- 查看自动钓鱼菜单");
         helpMessage.Append("\n/af status -- 查看个人状态");
-        helpMessage.Append("\n/af fish -- 开启丨关闭[c/4686D4:自动钓鱼]功能");
-        helpMessage.Append("\n/af buff -- 开启丨关闭[c/F6B152:钓鱼BUFF]");
-        helpMessage.Append("\n/af multi -- 开启丨关闭[c/87DF86:多钩功能] (需全局启用)");
-        helpMessage.Append("\n/af hook 数字 -- 设置个人钩子上限 (<= 全局上限)");
 
-        if (AutoFish.Config.ConsumptionModeEnabled)
+        if (AutoFish.Config.GlobalAutoFishFeatureEnabled && AutoFish.HasFeaturePermission(player, "autofish.fish"))
+            helpMessage.Append("\n/af fish -- 开启丨关闭[c/4686D4:自动钓鱼]功能");
+
+        if (AutoFish.Config.GlobalBuffFeatureEnabled && AutoFish.HasFeaturePermission(player, "autofish.buff"))
+            helpMessage.Append("\n/af buff -- 开启丨关闭[c/F6B152:钓鱼BUFF]");
+
+        if (AutoFish.Config.GlobalMultiHookFeatureEnabled && AutoFish.HasFeaturePermission(player, "autofish.multihook"))
+        {
+            helpMessage.Append("\n/af multi -- 开启丨关闭[c/87DF86:多钩功能]");
+            helpMessage.Append("\n/af hook 数字 -- 设置个人钩子上限 (<= 全局上限)");
+        }
+
+        if (AutoFish.Config.GlobalConsumptionModeEnabled)
             helpMessage.Append("\n/af list -- 列出消耗模式[c/F5F251:指定物品表]");
 
         if (AutoFish.Config.ExtraCatchItemIds.Count != 0)
@@ -39,12 +47,20 @@ public class Commands
         {
             helpMessage.Append("\n[全局] /af gbuff -- 开启丨关闭全局钓鱼BUFF");
             helpMessage.Append("\n[全局] /af gmore -- 开启丨关闭多线模式");
-            helpMessage.Append("\n[全局] /af gduo 数字 -- 设置多线的钩子数量上限");
+
+            if (AutoFish.Config.GlobalMultiHookFeatureEnabled)
+                helpMessage.Append("\n[全局] /af gduo 数字 -- 设置多线的钩子数量上限");
+
             helpMessage.Append("\n[全局] /af gmod -- 开启丨关闭消耗模式");
-            helpMessage.Append("\n[全局] /af gset 数量 -- 设置消耗物品数量要求");
-            helpMessage.Append("\n[全局] /af gtime 数字 -- 设置自动时长(分钟)");
-            helpMessage.Append("\n[全局] /af gadd 物品名 -- 添加指定鱼饵");
-            helpMessage.Append("\n[全局] /af gdel 物品名 -- 移除指定鱼饵");
+
+            if (AutoFish.Config.GlobalConsumptionModeEnabled)
+            {
+                helpMessage.Append("\n[全局] /af gset 数量 -- 设置消耗物品数量要求");
+                helpMessage.Append("\n[全局] /af gtime 数字 -- 设置自动时长(分钟)");
+                helpMessage.Append("\n[全局] /af gadd 物品名 -- 添加指定鱼饵");
+                helpMessage.Append("\n[全局] /af gdel 物品名 -- 移除指定鱼饵");
+            }
+
             helpMessage.Append("\n[全局] /af gaddloot 物品名 -- 添加额外渔获");
             helpMessage.Append("\n[全局] /af gdelloot 物品名 -- 移除额外渔获");
         }
@@ -74,7 +90,7 @@ public class Commands
                 args.Player.SendSuccessMessage("请输入该指令开启→: [c/92C5EC:/af fish]");
 
             //开启了消耗模式
-            else if (AutoFish.Config.ConsumptionModeEnabled)
+            else if (AutoFish.Config.GlobalConsumptionModeEnabled)
                 args.Player.SendMessage($"自动钓鱼[c/46C4D4:剩余时长]：[c/F3F292:{Math.Floor(remainingMinutes)}]分钟", 243, 181,
                     145);
 
@@ -106,7 +122,7 @@ public class Commands
         sb.AppendLine($"BUFF：{(playerData.BuffEnabled ? "开启" : "关闭")}");
         sb.AppendLine($"多钩：{(playerData.MultiHookEnabled ? "开启" : "关闭")}, 钩子上限：{playerData.HookMaxNum}");
 
-        if (AutoFish.Config.ConsumptionModeEnabled)
+        if (AutoFish.Config.GlobalConsumptionModeEnabled)
         {
             var minutesLeft = Math.Max(0, Math.Floor(remainingMinutes));
             var consumeLine = playerData.ConsumptionEnabled
@@ -156,7 +172,7 @@ public class Commands
                         return true;
                     }
 
-                    if (!AutoFish.Config.MultiHookEnabled)
+                    if (!AutoFish.Config.GlobalMultiHookFeatureEnabled)
                     {
                         args.Player.SendWarningMessage("多钩功能未在全局开启，无法切换。");
                         return true;
@@ -168,7 +184,7 @@ public class Commands
                 case "status":
                     SendStatus(args.Player, playerData, remainingMinutes);
                     return true;
-                case "list" when AutoFish.Config.ConsumptionModeEnabled:
+                case "list" when AutoFish.Config.GlobalConsumptionModeEnabled:
                     args.Player.SendInfoMessage("[指定消耗物品表]\n" + string.Join(", ",
                         AutoFish.Config.BaitItemIds.Select(x =>
                             TShock.Utils.GetItemById(x).Name + "([c/92C5EC:{0}])".SFormat(x))));
@@ -196,7 +212,7 @@ public class Commands
                         return true;
                     }
 
-                    if (!AutoFish.Config.MultiHookEnabled)
+                    if (!AutoFish.Config.GlobalMultiHookFeatureEnabled)
                     {
                         args.Player.SendWarningMessage("多钩功能未在全局开启，无法设置钩子数量。");
                         return true;
@@ -214,14 +230,14 @@ public class Commands
                         return true;
                     }
 
-                    if (personalMax > AutoFish.Config.MultiHookMaxNum)
+                    if (personalMax > AutoFish.Config.GlobalMultiHookMaxNum)
                     {
-                        args.Player.SendWarningMessage($"已限制为全局上限：{AutoFish.Config.MultiHookMaxNum}。");
-                        personalMax = AutoFish.Config.MultiHookMaxNum;
+                        args.Player.SendWarningMessage($"已限制为全局上限：{AutoFish.Config.GlobalMultiHookMaxNum}。");
+                        personalMax = AutoFish.Config.GlobalMultiHookMaxNum;
                     }
 
                     playerData.HookMaxNum = personalMax;
-                    args.Player.SendSuccessMessage($"已将个人钩子上限设置为：{personalMax} (全局上限 {AutoFish.Config.MultiHookMaxNum})");
+                    args.Player.SendSuccessMessage($"已将个人钩子上限设置为：{personalMax} (全局上限 {AutoFish.Config.GlobalMultiHookMaxNum})");
                     return true;
                 default:
                     return false;
@@ -242,23 +258,23 @@ public class Commands
             switch (sub)
             {
                 case "gmore":
-                    var multiEnabled = AutoFish.Config.MultiHookEnabled;
-                    AutoFish.Config.MultiHookEnabled = !multiEnabled;
+                    var multiEnabled = AutoFish.Config.GlobalMultiHookFeatureEnabled;
+                    AutoFish.Config.GlobalMultiHookFeatureEnabled = !multiEnabled;
                     var multiToggle = multiEnabled ? "禁用" : "启用";
                     args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{multiToggle}]多线模式");
                     AutoFish.Config.Write();
-                    playerData.MultiHookEnabled = AutoFish.Config.MultiHookEnabled;
+                    playerData.MultiHookEnabled = AutoFish.Config.GlobalMultiHookFeatureEnabled;
                     return true;
                 case "gbuff":
-                    var buffCfgEnabled = AutoFish.Config.GlobalBuffEnabled;
-                    AutoFish.Config.GlobalBuffEnabled = !buffCfgEnabled;
+                    var buffCfgEnabled = AutoFish.Config.GlobalBuffFeatureEnabled;
+                    AutoFish.Config.GlobalBuffFeatureEnabled = !buffCfgEnabled;
                     var buffToggleText = buffCfgEnabled ? "禁用" : "启用";
                     args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{buffToggleText}]全局钓鱼BUFF");
                     AutoFish.Config.Write();
                     return true;
                 case "gmod":
-                    var modEnabled = AutoFish.Config.ConsumptionModeEnabled;
-                    AutoFish.Config.ConsumptionModeEnabled = !modEnabled;
+                    var modEnabled = AutoFish.Config.GlobalConsumptionModeEnabled;
+                    AutoFish.Config.GlobalConsumptionModeEnabled = !modEnabled;
                     var modToggle = modEnabled ? "禁用" : "启用";
                     args.Player.SendSuccessMessage($"玩家 [{args.Player.Name}] 已[c/92C5EC:{modToggle}]消耗模式");
                     AutoFish.Config.Write();
@@ -350,7 +366,7 @@ public class Commands
                 case "gduo":
                     if (int.TryParse(args.Parameters[1], out var maxNum))
                     {
-                        AutoFish.Config.MultiHookMaxNum = maxNum;
+                        AutoFish.Config.GlobalMultiHookMaxNum = maxNum;
                         AutoFish.Config.Write();
                         args.Player.SendSuccessMessage("已成功将多钩数量上限设置为: [c/92C5EC:{0}] 个!", maxNum);
                     }

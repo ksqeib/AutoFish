@@ -19,7 +19,7 @@ public partial class AutoFish
     {
         var player = args.Player;
         if (!Config.PluginEnabled) return;
-        if (!Config.ConsumptionModeEnabled) return;
+        if (!Config.GlobalConsumptionModeEnabled) return;
         if (player == null) return;
         if (!player.IsLoggedIn) return;
         if (!player.Active) return;

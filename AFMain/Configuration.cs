@@ -17,19 +17,17 @@ internal class Configuration
 
     [JsonProperty("插件开关", Order = -13)] public bool PluginEnabled { get; set; } = true;
 
-    [JsonProperty("自动钓鱼开关", Order = -12)] public bool AutoFishFeatureEnabled { get; set; } = true;
-
-    [JsonProperty("多钩钓鱼", Order = -11)] public bool MultiHookEnabled { get; set; }
+    [JsonProperty("自动钓鱼开关", Order = -12)] public bool GlobalAutoFishFeatureEnabled { get; set; } = true;
+    [JsonProperty("多钩钓鱼", Order = -11)] public bool GlobalMultiHookFeatureEnabled { get; set; }
+    [JsonProperty("Buff开关", Order = -8)] public bool GlobalBuffFeatureEnabled { get; set; }
+    [JsonProperty("多钩上限", Order = -9)] public int GlobalMultiHookMaxNum { get; set; } = 5;
 
     [JsonProperty("随机物品", Order = -10)] public bool RandomLootEnabled { get; set; }
 
-    [JsonProperty("多钩上限", Order = -9)] public int MultiHookMaxNum { get; set; } = 5;
-
-    [JsonProperty("Buff开关", Order = -8)] public bool GlobalBuffEnabled { get; set; }
 
     [JsonProperty("Buff表", Order = -5)] public Dictionary<int, int> BuffDurations { get; set; } = new();
 
-    [JsonProperty("消耗模式", Order = -4)] public bool ConsumptionModeEnabled { get; set; }
+    [JsonProperty("消耗模式", Order = -4)] public bool GlobalConsumptionModeEnabled { get; set; }
 
     [JsonProperty("消耗数量", Order = -3)] public int BaitConsumeCount { get; set; } = 10;
 
